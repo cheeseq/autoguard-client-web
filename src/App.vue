@@ -50,18 +50,18 @@
            :reset="true"
            width="60%"
            height="auto">
-      <add-car v-on:car-created="pushCar"></add-car>
+      <register-car v-on:car-created="pushCar"></register-car>
     </modal>
   </div>
 </template>
 
 <script>
 import "materialize-css/dist/css/materialize.min.css";
-import AddCar from "@/components/AddCar";
+import RegisterCar from "@/components/RegisterCar";
 
 export default {
   name: 'App',
-  components: {AddCar},
+  components: {RegisterCar},
   data() {
     return {
       cars: [

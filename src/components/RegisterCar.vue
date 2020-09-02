@@ -79,7 +79,7 @@ import 'vue2-datepicker/index.css';
 import 'vue2-datepicker/locale/ru'
 
 export default {
-  name: "AddCar",
+  name: "RegisterCar",
   components: {
     DatePicker
   },
