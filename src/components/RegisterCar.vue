@@ -9,22 +9,22 @@
           </label>
         </div>
         <div class="col s3">
-          <label id="prepay_sum" v-show="car.is_prepay">
-            Сумма
-            <input type="text" v-model="car.prepay_sum">
-          </label>
+          <div class="input-field" v-show="car.is_prepay">
+            <input type="text" v-model="$v.car.prepay_sum.$model" :class="{'invalid': $v.car.prepay_sum.$error}" placeholder="Сумма">
+            <span v-if="!$v.car.prepay_sum.required" class="helper-text" data-error="Обязательно для заполнения"></span>
+          </div>
         </div>
         <div class="col s3">
-          <label id="prepay_deadline" v-show="car.is_prepay">
-            Дата истечения
-            <date-picker v-model="car.prepay_expires_at"></date-picker>
-          </label>
+          <div class="input-field" v-show="car.is_prepay">
+            <date-picker v-model="$v.car.prepay_expires_at.$model" :input-class="{'invalid': $v.car.prepay_expires_at.$error}" placeholder="Дата истечения"></date-picker>
+            <span v-if="!$v.car.prepay_expires_at.required" class="helper-text" data-error="Обязательно для заполнения"></span>
+          </div>
         </div>
         <div class="col s3">
-          <label v-show="car.is_prepay">
-            Время истечения
-            <date-picker type="time" format="hh:mm" v-model="car.prepay_expires_at_time"></date-picker>
-          </label>
+          <div class="input-field" v-show="car.is_prepay">
+            <date-picker type="time" v-model="$v.car.prepay_expires_at_time.$model" :input-class="{'invalid': $v.car.prepay_expires_at_time.$error}" placeholder="Время истечения"></date-picker>
+            <span v-if="!$v.car.prepay_expires_at_time.required" class="helper-text" data-error="Обязательно для заполнения"></span>
+          </div>
         </div>
       </div>
       <div class="row">
@@ -88,7 +88,7 @@
 import DatePicker from 'vue2-datepicker';
 import 'vue2-datepicker/index.css';
 import 'vue2-datepicker/locale/ru'
-import {required} from "vuelidate/lib/validators";
+import {required, requiredIf} from "vuelidate/lib/validators";
 
 export default {
   name: "RegisterCar",
@@ -102,6 +102,7 @@ export default {
         is_prepay: false,
         prepay_sum: null,
         prepay_expires_at: new Date(),
+        prepay_expires_at_time: null,
         manufacturer: null,
         model: null,
         gov_id: null,
@@ -113,6 +114,15 @@ export default {
   },
   validations: {
     car: {
+      prepay_sum: {
+        required: requiredIf('is_prepay')
+      },
+      prepay_expires_at: {
+        required: requiredIf('is_prepay')
+      },
+      prepay_expires_at_time: {
+        required: requiredIf('is_prepay')
+      },
       manufacturer: {
         required
       },
