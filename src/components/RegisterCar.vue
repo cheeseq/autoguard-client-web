@@ -8,22 +8,32 @@
             <span>Предоплата</span>
           </label>
         </div>
-        <div class="col s3">
+        <div class="col s4">
           <div class="input-field" v-show="car.is_prepay">
-            <input type="text" v-model="$v.car.prepay_sum.$model" :class="{'invalid': $v.car.prepay_sum.$error}" placeholder="Сумма">
+            <input type="text" @input="onPrepaySumChange" :value="car.prepay_sum" :class="{'invalid': $v.car.prepay_sum.$error}" placeholder="Сумма" required>
             <span v-if="!$v.car.prepay_sum.required" class="helper-text" data-error="Обязательно для заполнения"></span>
           </div>
         </div>
-        <div class="col s3">
+        <div class="col s5">
           <div class="input-field" v-show="car.is_prepay">
-            <date-picker v-model="$v.car.prepay_expires_at.$model" :input-class="{'invalid': $v.car.prepay_expires_at.$error}" placeholder="Дата истечения"></date-picker>
+            <date-picker
+                type="datetime"
+                format="DD MMM YYYY HH:mm"
+                @input="onPrepayExpiresAtChange"
+                :value="car.prepay_expires_at"
+                :input-class="{'invalid': $v.car.prepay_expires_at.$error}"
+                :time-title-format="'DD MMM YYYY'"
+                placeholder="Дата истечения"
+                :disabled-date="disabledBeforeToday"
+                :disabled-time="disabledBeforeNow"
+                :editable="false"
+                :time-picker-options="{
+                  start: '00:00',
+                  end: '23:00',
+                  step: '01:00',
+                  format: 'HH:mm'
+                }"></date-picker>
             <span v-if="!$v.car.prepay_expires_at.required" class="helper-text" data-error="Обязательно для заполнения"></span>
-          </div>
-        </div>
-        <div class="col s3">
-          <div class="input-field" v-show="car.is_prepay">
-            <date-picker type="time" v-model="$v.car.prepay_expires_at_time.$model" :input-class="{'invalid': $v.car.prepay_expires_at_time.$error}" placeholder="Время истечения"></date-picker>
-            <span v-if="!$v.car.prepay_expires_at_time.required" class="helper-text" data-error="Обязательно для заполнения"></span>
           </div>
         </div>
       </div>
@@ -90,6 +100,9 @@ import 'vue2-datepicker/index.css';
 import 'vue2-datepicker/locale/ru'
 import {required, requiredIf} from "vuelidate/lib/validators";
 
+const _MS_PER_HOUR = 1000 * 60 * 60;
+const RATE = 3.33;
+
 export default {
   name: "RegisterCar",
   components: {
@@ -101,8 +114,7 @@ export default {
       car: {
         is_prepay: false,
         prepay_sum: null,
-        prepay_expires_at: new Date(),
-        prepay_expires_at_time: null,
+        prepay_expires_at: null,
         manufacturer: null,
         model: null,
         gov_id: null,
@@ -112,15 +124,15 @@ export default {
       }
     }
   },
+  mounted() {
+    this.onPrepayExpiresAtChange(new Date(new Date().getTime() + (24 * _MS_PER_HOUR)));
+  },
   validations: {
     car: {
       prepay_sum: {
         required: requiredIf('is_prepay')
       },
       prepay_expires_at: {
-        required: requiredIf('is_prepay')
-      },
-      prepay_expires_at_time: {
         required: requiredIf('is_prepay')
       },
       manufacturer: {
@@ -144,9 +156,44 @@ export default {
         this.$emit("car-created", this.car);
         this.$modal.hide("add-car-modal");
       }
-    }
-  }
+    },
+    dateDiffInHours(a, b) {
+      // Discard the time and time-zone information.
+      const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate(), a.getHours(), a.getMinutes(), a.getSeconds(), a.getMilliseconds());
+      const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate(), b.getHours(), b.getMinutes(), b.getSeconds(), b.getMilliseconds());
 
+      return Math.ceil((utc2 - utc1) / _MS_PER_HOUR);
+    },
+    onPrepaySumChange(newValue) {
+      newValue = newValue.target.value;
+      let addHours = (newValue / RATE) * _MS_PER_HOUR;
+      let millis = Date.now() + addHours;
+      this.car.prepay_expires_at = new Date(millis);
+      this.car.prepay_sum = Math.round(newValue);
+      this.$v.car.prepay_sum.$touch();
+      this.$v.car.prepay_expires_at.$touch();
+    },
+    onPrepayExpiresAtChange(newValue) {
+      console.log(newValue);
+      let currDate = new Date();
+      let diff = this.dateDiffInHours(currDate, newValue);
+      this.car.prepay_sum = Math.round(diff * RATE);
+      this.car.prepay_expires_at = newValue;
+      this.$v.car.prepay_expires_at.$touch();
+      this.$v.car.prepay_sum.$touch();
+    },
+    disabledBeforeToday(date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return date < today;
+    },
+    disabledBeforeNow(date) {
+      const today = new Date();
+
+      return date < today;
+    },
+  }
 }
 </script>
 
