@@ -50,7 +50,7 @@
            :reset="true"
            width="60%"
            height="auto">
-      <register-car v-on:car-created="pushCar"></register-car>
+      <register-car @car-created="pushCar" :daily-rates="[80, 130, 170]"></register-car>
     </modal>
   </div>
 </template>

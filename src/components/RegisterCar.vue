@@ -69,14 +69,24 @@
             <input type="text" id="phone" v-model="car.owner_phone" placeholder="Телефон" v-mask="'+7 ### ### ## ##'">
           </div>
         </div>
-        <div class="row">
-          <div class="col s12">
-            <div class="input-field">
-              <textarea id="note" class="materialize-textarea" v-model="car.note" placeholder="Комментарий"></textarea>
-            </div>
+      </div>
+
+      <div class="row">
+        <div class="col s12">
+          <select class="browser-default" v-model="car.rate">
+            <option v-for="dailyRate of dailyRates" :value="dailyRate" :key="dailyRate">Тариф: {{ dailyRate }} рублей/сутки</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col s12">
+          <div class="input-field">
+            <textarea id="note" class="materialize-textarea" v-model="car.note" placeholder="Комментарий"></textarea>
           </div>
         </div>
       </div>
+
       <div class="row">
         <div class="col s5 offset-s7">
           <div class="row">
@@ -101,12 +111,17 @@ import 'vue2-datepicker/locale/ru'
 import {required, requiredIf} from "vuelidate/lib/validators";
 
 const _MS_PER_HOUR = 1000 * 60 * 60;
-const RATE = 3.33;
 
 export default {
   name: "RegisterCar",
   components: {
     DatePicker
+  },
+  props: {
+    dailyRates: {
+      type: Array,
+      required: true
+    }
   },
   data() {
     return {
@@ -120,8 +135,19 @@ export default {
         gov_id: null,
         owner_fullname: null,
         owner_phone: null,
-        note: null
+        note: null,
+        rate: this.dailyRates[0]
       }
+    }
+  },
+  watch: {
+    'car.rate': function () {
+      this.onPrepayExpiresAtChange(this.car.prepay_expires_at);
+    }
+  },
+  computed: {
+    hourlyRate() {
+      return this.car.rate / 24;
     }
   },
   mounted() {
@@ -166,7 +192,7 @@ export default {
     },
     onPrepaySumChange(newValue) {
       newValue = newValue.target.value;
-      let addHours = (newValue / RATE) * _MS_PER_HOUR;
+      let addHours = (newValue / this.hourlyRate) * _MS_PER_HOUR;
       let millis = Date.now() + addHours;
       this.car.prepay_expires_at = new Date(millis);
       this.car.prepay_sum = Math.round(newValue);
@@ -177,7 +203,7 @@ export default {
       console.log(newValue);
       let currDate = new Date();
       let diff = this.dateDiffInHours(currDate, newValue);
-      this.car.prepay_sum = Math.round(diff * RATE);
+      this.car.prepay_sum = Math.round(diff * this.hourlyRate);
       this.car.prepay_expires_at = newValue;
       this.$v.car.prepay_expires_at.$touch();
       this.$v.car.prepay_sum.$touch();
