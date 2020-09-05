@@ -66,7 +66,7 @@
         </div>
         <div class="col s4">
           <div class="input-field">
-            <input type="text" id="phone" v-model="car.owner_phone" placeholder="Телефон">
+            <input type="text" id="phone" v-model="car.owner_phone" placeholder="Телефон" v-mask="'+7 ### ### ## ##'">
           </div>
         </div>
         <div class="row">
