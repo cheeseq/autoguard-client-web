@@ -17,20 +17,20 @@
             <th>Ф.И.О</th>
             <th>Телефон</th>
             <th>Заезд</th>
-            <th>Истекает</th>
+            <th>Предоплата истекает</th>
             <th>Статус</th>
             <th></th>
           </tr>
           </thead>
           <tbody>
-          <tr v-for="car of cars" v-bind:key="car.owner_phone">
+          <tr v-for="car of cars" v-bind:key="car.owner_phone" :class="{'red lighten-4': car.status === 2}">
             <td>{{ car.manufacturer }} {{ car.model }}</td>
             <td>{{ car.gov_id }}</td>
             <td>{{ car.owner_fullname }}</td>
             <td>{{ car.owner_phone }}</td>
             <td>{{ new Date(car.registered_at).toLocaleString() }}</td>
             <td>{{ car.prepay_expires_at ? new Date(car.prepay_expires_at).toLocaleString() : '-' }}</td>
-            <td>{{ statuses[car.status] }}</td>
+            <td><span :class="{'red-text': car.status === 2}">{{ statuses[car.status] }}</span></td>
             <td>
               <div><a href="#">Подробно</a></div>
               <div><a href="#">Выезд</a></div>
@@ -50,9 +50,9 @@
       <register-car @car-created="pushCar" :daily-rates="[80, 130, 170]"></register-car>
     </modal>
 
-    <modal name="car-details">
+    <!--<modal name="car-details">
       <car-details :car="selectedCarForDetails"></car-details>
-    </modal>
+    </modal>-->
 
   </div>
 </template>
@@ -79,21 +79,46 @@ export default {
           "gov_id": "АА111А",
           "owner_fullname": "Иванов Иван Иванович",
           "owner_phone": "+7 999 999 99 99",
-          "registered_at": new Date(2020, 8, 25, 11, 1),
+          "registered_at": new Date(2020, 7, 25, 11, 1),
+          "expires_at": new Date(2020, 8, 6, 21, 44),
           "prepay_expires_at": null,
           "status": 1,
           "note": null
+        },
+        {
+          "manufacturer": "Hyundai",
+          "model": "Solaris",
+          "gov_id": "АА111А",
+          "owner_fullname": "Предпоплатник",
+          "owner_phone": "+7 999 999 99 99",
+          "registered_at": new Date(2020, 7, 6, 21, 25),
+          "expires_at": new Date(2020, 9, 6, 11, 1),
+          "prepay_expires_at": new Date(2020, 8, 6, 21, 26),
+          "status": 3,
+          "note": null
         }
-      ]
+      ],
+      owner_deadline: 86400 * 30
     }
   },
   mounted() {
     //@todo fetch cars from api
-    //@todo автопереход в должники
+    setInterval(() => {
+      let currentDate = new Date();
+      for (let car of this.cars) {
+        console.log(currentDate.getMinutes(), currentDate.getSeconds());
+        if (car.status === 1 && car.expires_at < currentDate) {
+          car.status = 2;
+        } else if (car.status === 3 && (car.prepay_expires_at < currentDate)) {
+          car.status = 1;
+        }
+      }
+    }, 10000);
   },
   methods: {
     pushCar(car) {
       car.registered_at = new Date();
+      car.expires_at = new Date().setMonth(new Date().getMonth() + 1);
       car.status = 1;
       //@todo add to local queue
       //@todo send to api
