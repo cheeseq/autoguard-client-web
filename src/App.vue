@@ -32,7 +32,7 @@
             <td>{{ car.prepay_expires_at ? new Date(car.prepay_expires_at).toLocaleString() : '-' }}</td>
             <td><span :class="{'red-text': car.status === 2}">{{ statuses[car.status] }}</span></td>
             <td>
-              <div><a href="#">Подробно</a></div>
+              <div><a href="#" @click="showDetails(car)">Подробно</a></div>
               <div><a href="#">Выезд</a></div>
             </td>
           </tr>
@@ -50,9 +50,11 @@
       <register-car @car-created="pushCar" :daily-rates="[80, 130, 170]"></register-car>
     </modal>
 
-    <!--<modal name="car-details">
-      <car-details :car="selectedCarForDetails"></car-details>
-    </modal>-->
+    <modal name="car-details">
+      <div class="modal-content">
+        <order-details :car="selectedCarForDetails" :statuses="statuses"></order-details>
+      </div>
+    </modal>
 
   </div>
 </template>
@@ -60,10 +62,11 @@
 <script>
 import "materialize-css/dist/css/materialize.min.css";
 import RegisterCar from "@/components/RegisterCar";
+import OrderDetails from "@/components/OrderDetails";
 
 export default {
   name: 'App',
-  components: {RegisterCar},
+  components: {RegisterCar, OrderDetails},
   data() {
     return {
       statuses: {
@@ -98,11 +101,13 @@ export default {
           "note": null
         }
       ],
-      owner_deadline: 86400 * 30
+      owner_deadline: 86400 * 30,
+      selectedCarForDetails: null
     }
   },
   mounted() {
     //@todo fetch cars from api
+    //@todo fetch owner deadline
     setInterval(() => {
       let currentDate = new Date();
       for (let car of this.cars) {
@@ -113,7 +118,7 @@ export default {
           car.status = 1;
         }
       }
-    }, 10000);
+    }, 60000);
   },
   methods: {
     pushCar(car) {
@@ -123,6 +128,10 @@ export default {
       //@todo add to local queue
       //@todo send to api
       this.cars.push(car);
+    },
+    showDetails(car) {
+      this.selectedCarForDetails = car;
+      this.$modal.show('car-details');
     }
   }
 }
