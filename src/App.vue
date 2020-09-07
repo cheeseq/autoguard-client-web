@@ -33,6 +33,7 @@
             <td><span :class="{'red-text': car.status === 2}">{{ statuses[car.status] }}</span></td>
             <td>
               <div><a href="#" @click="showDetails(car)">Подробно</a></div>
+              <div><a href="#" @click="showCheckout(car)">checkout</a></div>
               <div><a href="#">Выезд</a></div>
             </td>
           </tr>
@@ -52,7 +53,13 @@
 
     <modal name="car-details">
       <div class="modal-content">
-        <order-details :car="selectedCarForDetails" :statuses="statuses"></order-details>
+        <order-details :car="selectedCar" :statuses="statuses"></order-details>
+      </div>
+    </modal>
+
+    <modal name="order-checkout">
+      <div style="padding: 2rem;">
+        <order-checkout :car="selectedCar" :statuses="statuses" @orderCheckout="orderCheckout"></order-checkout>
       </div>
     </modal>
 
@@ -63,10 +70,11 @@
 import "materialize-css/dist/css/materialize.min.css";
 import RegisterCar from "@/components/RegisterCar";
 import OrderDetails from "@/components/OrderDetails";
+import OrderCheckout from "@/components/OrderCheckout";
 
 export default {
   name: 'App',
-  components: {RegisterCar, OrderDetails},
+  components: {RegisterCar, OrderDetails, OrderCheckout},
   data() {
     return {
       statuses: {
@@ -102,7 +110,7 @@ export default {
         }
       ],
       owner_deadline: 86400 * 30,
-      selectedCarForDetails: null
+      selectedCar: null
     }
   },
   mounted() {
@@ -130,8 +138,18 @@ export default {
       this.cars.push(car);
     },
     showDetails(car) {
-      this.selectedCarForDetails = car;
+      this.selectedCar = car;
       this.$modal.show('car-details');
+    },
+    showCheckout(car) {
+      this.selectedCar = car;
+      this.$modal.show('order-checkout');
+    },
+    orderCheckout(car) {
+      console.log('ord checkout');
+      let idx = this.cars.findIndex((c) => c.owner_fullname === car.owner_fullname);
+      this.cars.splice(idx, 1);
+      this.$modal.hide('order-checkout');
     }
   }
 }
