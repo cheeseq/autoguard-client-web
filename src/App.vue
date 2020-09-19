@@ -23,23 +23,39 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="car of cars" v-bind:key="car.owner_phone" :class="{'red lighten-4': car.status === 2}">
+          <tr v-for="car of cars" v-bind:key="car.owner_phone" :class="{'red lighten-4': isDebtor(car), 'grey lighten-3': isLeftPrepayer(car)}">
             <td>{{ car.manufacturer }} {{ car.model }}</td>
             <td>{{ car.gov_id }}</td>
             <td>{{ car.owner_fullname }}</td>
             <td>{{ car.owner_phone }}</td>
             <td>{{ new Date(car.registered_at).toLocaleString() }}</td>
             <td>{{ car.prepay_expires_at ? new Date(car.prepay_expires_at).toLocaleString() : '-' }}</td>
-            <td><span :class="{'red-text': car.status === 2}">{{ statuses[car.status] }}</span></td>
+            <td><span :class="{'red-text': isDebtor(car)}">{{ statuses[car.status] }}</span></td>
             <td>
               <div><a href="#">Подробно</a></div>
-              <div><a href="#">Выезд</a></div>
+              <div v-if="isPrepayer(car)">
+                <a href="#" @click="openActionModal('temp-leave-car-modal', car)"
+                >Выезд</a>
+              </div>
             </td>
           </tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <modal name="temp-leave-car-modal" :min-width="200"
+           :min-height="200"
+           :scrollable="true"
+           :reset="true"
+           width="60%"
+           height="auto">
+      <temp-leave
+          :car="selectedCar"
+          @action:cancel:temp-leave="$modal.hide('temp-leave-car-modal')"
+          @action:commit:temp-leave="$modal.hide('temp-leave-car-modal')"
+      ></temp-leave>
+    </modal>
 
     <modal name="add-car-modal" :min-width="200"
            :min-height="200"
@@ -60,12 +76,14 @@
 <script>
 import "materialize-css/dist/css/materialize.min.css";
 import RegisterCar from "@/components/RegisterCar";
+import TempLeave from "@/components/actions/TempLeave";
 
 export default {
   name: 'App',
-  components: {RegisterCar},
+  components: {TempLeave, RegisterCar},
   data() {
     return {
+      selectedCar: null,
       statuses: {
         1: "Не оплачен",
         2: "Должник",
@@ -94,6 +112,7 @@ export default {
           "registered_at": new Date(2020, 7, 6, 21, 25),
           "expires_at": new Date(2020, 9, 6, 11, 1),
           "prepay_expires_at": new Date(2020, 8, 6, 21, 26),
+          "temp_left_at": null, //когда отъехал предоплатник
           "status": 3,
           "note": null
         }
@@ -123,6 +142,19 @@ export default {
       //@todo add to local queue
       //@todo send to api
       this.cars.push(car);
+    },
+    isDebtor(car) {
+      return car.status === 2;
+    },
+    isPrepayer(car) {
+      return car.status === 3;
+    },
+    isLeftPrepayer(car) {
+      return car.status === 4;
+    },
+    openActionModal(modalName, car) {
+      this.selectedCar = car;
+      this.$modal.show(modalName);
     }
   }
 }
