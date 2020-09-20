@@ -1,7 +1,7 @@
 <template>
   <div style="padding: 2rem;">
     <div class="row">
-      Подтвердить выезд предоплатника?
+      Подтвердить заезд предоплатника?
     </div>
 
     <div class="row">
@@ -21,8 +21,10 @@
 </template>
 
 <script>
+import moment from 'moment';
+
 export default {
-  name: "TempLeave",
+  name: "Comeback",
   props: {
     car: {
       type: Object,
@@ -31,14 +33,13 @@ export default {
   },
   methods: {
     commitAction() {
-      this.car.temp_left_at = new Date();
-      this.car.status = 4;
+      let duration = moment.duration(moment().diff(this.car.temp_left_at));
+      this.car.expires_at = moment(this.car.expires_at).add(duration).toDate();
+      this.car.prepay_expires_at = moment(this.car.prepay_expires_at).add(duration).toDate();
+      this.car.temp_left_at = null;
+      this.car.status = 3;
       this.$emit('action:commit');
     }
   }
 }
 </script>
-
-<style scoped>
-
-</style>

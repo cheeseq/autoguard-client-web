@@ -33,10 +33,8 @@
             <td><span :class="{'red-text': isDebtor(car)}">{{ statuses[car.status] }}</span></td>
             <td>
               <div><a href="#">Подробно</a></div>
-              <div v-if="isPrepayer(car)">
-                <a href="#" @click="openActionModal('temp-leave-car-modal', car)"
-                >Выезд</a>
-              </div>
+              <div v-if="isPrepayer(car)"><a href="#" @click="setAction('temp-leave', car)">Выезд</a></div>
+              <div v-if="isLeftPrepayer(car)"><a href="#" @click="setAction('comeback', car)">Заезд</a></div>
             </td>
           </tr>
           </tbody>
@@ -44,17 +42,20 @@
       </div>
     </div>
 
-    <modal name="temp-leave-car-modal" :min-width="200"
-           :min-height="200"
-           :scrollable="true"
-           :reset="true"
-           width="60%"
-           height="auto">
-      <temp-leave
+    <modal
+        name="action-modal"
+        :min-width="200"
+        :min-height="200"
+        :scrollable="true"
+        :reset="true"
+        width="60%"
+        height="auto">
+      <component
+          :is="currentAction"
           :car="selectedCar"
-          @action:cancel:temp-leave="$modal.hide('temp-leave-car-modal')"
-          @action:commit:temp-leave="$modal.hide('temp-leave-car-modal')"
-      ></temp-leave>
+          @action:cancel="cancelAction"
+          @action:commit="commitAction"
+      ></component>
     </modal>
 
     <modal name="add-car-modal" :min-width="200"
@@ -77,12 +78,14 @@
 import "materialize-css/dist/css/materialize.min.css";
 import RegisterCar from "@/components/RegisterCar";
 import TempLeave from "@/components/actions/TempLeave";
+import Comeback from "@/components/actions/Comeback";
 
 export default {
   name: 'App',
-  components: {TempLeave, RegisterCar},
+  components: {TempLeave, RegisterCar, Comeback},
   data() {
     return {
+      currentAction: null,
       selectedCar: null,
       statuses: {
         1: "Не оплачен",
@@ -111,7 +114,7 @@ export default {
           "owner_phone": "+7 999 999 99 99",
           "registered_at": new Date(2020, 7, 6, 21, 25),
           "expires_at": new Date(2020, 9, 6, 11, 1),
-          "prepay_expires_at": new Date(2020, 8, 6, 21, 26),
+          "prepay_expires_at": new Date(2020, 9, 6, 21, 26),
           "temp_left_at": null, //когда отъехал предоплатник
           "status": 3,
           "note": null
@@ -132,7 +135,7 @@ export default {
           car.status = 1;
         }
       }
-    }, 10000);
+    }, 60000);
   },
   methods: {
     pushCar(car) {
@@ -152,9 +155,22 @@ export default {
     isLeftPrepayer(car) {
       return car.status === 4;
     },
-    openActionModal(modalName, car) {
+    setAction(actionName, car) {
+      this.currentAction = actionName;
       this.selectedCar = car;
-      this.$modal.show(modalName);
+      this.openActionModal();
+    },
+    cancelAction() {
+      this.closeActionModal();
+    },
+    commitAction() {
+      this.closeActionModal();
+    },
+    openActionModal() {
+      this.$modal.show('action-modal');
+    },
+    closeActionModal() {
+      this.$modal.hide('action-modal');
     }
   }
 }
