@@ -23,24 +23,41 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="car of cars" v-bind:key="car.owner_phone" :class="{'red lighten-4': car.status === 2}">
+          <tr v-for="car of cars" v-bind:key="car.owner_phone" :class="{'red lighten-4': isDebtor(car), 'grey lighten-3': isLeftPrepayer(car)}">
             <td>{{ car.manufacturer }} {{ car.model }}</td>
             <td>{{ car.gov_id }}</td>
             <td>{{ car.owner_fullname }}</td>
             <td>{{ car.owner_phone }}</td>
             <td>{{ new Date(car.registered_at).toLocaleString() }}</td>
             <td>{{ car.prepay_expires_at ? new Date(car.prepay_expires_at).toLocaleString() : '-' }}</td>
-            <td><span :class="{'red-text': car.status === 2}">{{ statuses[car.status] }}</span></td>
+            <td><span :class="{'red-text': isDebtor(car)}">{{ statuses[car.status] }}</span></td>
             <td>
               <div><a href="#" @click="showDetails(car)">Подробно</a></div>
               <div><a href="#" @click="showCheckout(car)">checkout</a></div>
-              <div><a href="#">Выезд</a></div>
+              <div v-if="isPrepayer(car)"><a href="#" @click="setAction('temp-leave', car)">Выезд</a></div>
+              <div v-if="isLeftPrepayer(car)"><a href="#" @click="setAction('comeback', car)">Заезд</a></div>
             </td>
           </tr>
           </tbody>
         </table>
       </div>
     </div>
+
+    <modal
+        name="action-modal"
+        :min-width="200"
+        :min-height="200"
+        :scrollable="true"
+        :reset="true"
+        width="60%"
+        height="auto">
+      <component
+          :is="currentAction"
+          :car="selectedCar"
+          @action:cancel="cancelAction"
+          @action:commit="commitAction"
+      ></component>
+    </modal>
 
     <modal name="add-car-modal" :min-width="200"
            :min-height="200"
@@ -71,12 +88,16 @@ import "materialize-css/dist/css/materialize.min.css";
 import RegisterCar from "@/components/RegisterCar";
 import OrderDetails from "@/components/OrderDetails";
 import OrderCheckout from "@/components/OrderCheckout";
+import TempLeave from "@/components/actions/TempLeave";
+import Comeback from "@/components/actions/Comeback";
 
 export default {
   name: 'App',
-  components: {RegisterCar, OrderDetails, OrderCheckout},
+  components: {RegisterCar, OrderDetails, OrderCheckout, TempLeave, Comeback},
   data() {
     return {
+      currentAction: null,
+      selectedCar: null,
       statuses: {
         1: "Не оплачен",
         2: "Должник",
@@ -104,7 +125,8 @@ export default {
           "owner_phone": "+7 999 999 99 99",
           "registered_at": new Date(2020, 7, 6, 21, 25),
           "expires_at": new Date(2020, 9, 6, 11, 1),
-          "prepay_expires_at": new Date(2020, 8, 6, 21, 26),
+          "prepay_expires_at": new Date(2020, 9, 6, 21, 26),
+          "temp_left_at": null, //когда отъехал предоплатник
           "status": 3,
           "note": null
         }
@@ -150,6 +172,32 @@ export default {
       let idx = this.cars.findIndex((c) => c.owner_fullname === car.owner_fullname);
       this.cars.splice(idx, 1);
       this.$modal.hide('order-checkout');
+    },
+    isDebtor(car) {
+      return car.status === 2;
+    },
+    isPrepayer(car) {
+      return car.status === 3;
+    },
+    isLeftPrepayer(car) {
+      return car.status === 4;
+    },
+    setAction(actionName, car) {
+      this.currentAction = actionName;
+      this.selectedCar = car;
+      this.openActionModal();
+    },
+    cancelAction() {
+      this.closeActionModal();
+    },
+    commitAction() {
+      this.closeActionModal();
+    },
+    openActionModal() {
+      this.$modal.show('action-modal');
+    },
+    closeActionModal() {
+      this.$modal.hide('action-modal');
     }
   }
 }
