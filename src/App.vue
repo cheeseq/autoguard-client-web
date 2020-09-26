@@ -2,7 +2,7 @@
   <div id="app" style="padding-top: 2rem;">
     <div class="row">
       <div class="col s12">
-        <button class="btn" v-on:click="$modal.show('add-car-modal')">Добавить авто</button>
+        <button class="btn" @click="setAction('register-car-action')">Добавить авто</button>
       </div>
     </div>
 
@@ -32,10 +32,11 @@
             <td>{{ car.prepay_expires_at ? new Date(car.prepay_expires_at).toLocaleString() : '-' }}</td>
             <td><span :class="{'red-text': isDebtor(car)}">{{ statuses[car.status] }}</span></td>
             <td>
-              <div><a href="#" @click="showDetails(car)">Подробно</a></div>
-              <div><a href="#" @click="showCheckout(car)">checkout</a></div>
-              <div v-if="isPrepayer(car)"><a href="#" @click="setAction('temp-leave', car)">Выезд</a></div>
-              <div v-if="isLeftPrepayer(car)"><a href="#" @click="setAction('comeback', car)">Заезд</a></div>
+              <div><a href="#" @click="setAction('order-details-action', car)">Подробно</a></div>
+              <div v-if="isUnpaid(car) || isDebtor(car)"><a href="#" @click="setAction('order-checkout-action', car)">Расчет</a>
+              </div>
+              <div v-if="isPrepayer(car)"><a href="#" @click="setAction('temp-leave-action', car)">Выезд</a></div>
+              <div v-if="isLeftPrepayer(car)"><a href="#" @click="setAction('comeback-action', car)">Заезд</a></div>
             </td>
           </tr>
           </tbody>
@@ -51,32 +52,16 @@
         :reset="true"
         width="60%"
         height="auto">
-      <component
-          :is="currentAction"
-          :car="selectedCar"
-          @action:cancel="cancelAction"
-          @action:commit="commitAction"
-      ></component>
-    </modal>
-
-    <modal name="add-car-modal" :min-width="200"
-           :min-height="200"
-           :scrollable="true"
-           :reset="true"
-           width="60%"
-           height="auto">
-      <register-car @car-created="pushCar" :daily-rates="[80, 130, 170]"></register-car>
-    </modal>
-
-    <modal name="car-details">
-      <div class="modal-content">
-        <order-details :car="selectedCar" :statuses="statuses"></order-details>
-      </div>
-    </modal>
-
-    <modal name="order-checkout">
       <div style="padding: 2rem;">
-        <order-checkout :car="selectedCar" :statuses="statuses" @orderCheckout="orderCheckout"></order-checkout>
+        <component
+            :is="currentAction"
+            :car="selectedCar"
+            :cars="cars"
+            :statuses="statuses"
+            :daily-rates="[80, 130, 170]"
+            @action:cancel="cancelAction"
+            @action:commit="commitAction"
+        ></component>
       </div>
     </modal>
 
@@ -85,15 +70,15 @@
 
 <script>
 import "materialize-css/dist/css/materialize.min.css";
-import RegisterCar from "@/components/RegisterCar";
-import OrderDetails from "@/components/OrderDetails";
-import OrderCheckout from "@/components/OrderCheckout";
-import TempLeave from "@/components/actions/TempLeave";
-import Comeback from "@/components/actions/Comeback";
+import RegisterCarAction from "@/components/actions/RegisterCarAction";
+import OrderDetailsAction from "@/components/actions/OrderDetailsAction";
+import OrderCheckoutAction from "@/components/actions/OrderCheckoutAction";
+import TempLeaveAction from "@/components/actions/TempLeaveAction";
+import ComebackAction from "@/components/actions/ComebackAction";
 
 export default {
   name: 'App',
-  components: {RegisterCar, OrderDetails, OrderCheckout, TempLeave, Comeback},
+  components: {RegisterCarAction, OrderDetailsAction, OrderCheckoutAction, TempLeaveAction, ComebackAction},
   data() {
     return {
       currentAction: null,
@@ -132,7 +117,6 @@ export default {
         }
       ],
       owner_deadline: 86400 * 30,
-      selectedCar: null
     }
   },
   mounted() {
@@ -151,27 +135,8 @@ export default {
     }, 60000);
   },
   methods: {
-    pushCar(car) {
-      car.registered_at = new Date();
-      car.expires_at = new Date().setMonth(new Date().getMonth() + 1);
-      car.status = 1;
-      //@todo add to local queue
-      //@todo send to api
-      this.cars.push(car);
-    },
-    showDetails(car) {
-      this.selectedCar = car;
-      this.$modal.show('car-details');
-    },
-    showCheckout(car) {
-      this.selectedCar = car;
-      this.$modal.show('order-checkout');
-    },
-    orderCheckout(car) {
-      console.log('ord checkout');
-      let idx = this.cars.findIndex((c) => c.owner_fullname === car.owner_fullname);
-      this.cars.splice(idx, 1);
-      this.$modal.hide('order-checkout');
+    isUnpaid(car) {
+      return car.status === 1;
     },
     isDebtor(car) {
       return car.status === 2;

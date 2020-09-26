@@ -1,30 +1,22 @@
 <template>
-  <div style="padding: 2rem;">
+  <div>
     <div class="row">
       Подтвердить заезд предоплатника?
     </div>
 
-    <div class="row">
-      <div class="col s5 offset-s7">
-        <div class="row">
-          <div class="col s5">
-            <button type="button" class="btn red lighten-2" @click="$emit('action:cancel')">Отмена</button>
-          </div>
-          <div class="col s7">
-            <button type="button" class="btn green lighten-2" @click="commitAction">Сохранить</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    <action-buttons
+        @action:commit="commitAction"
+        @action:cancel="$emit('action:cancel')"></action-buttons>
   </div>
 </template>
 
 <script>
 import moment from 'moment';
+import ActionButtons from "@/components/ActionButtons";
 
 export default {
-  name: "Comeback",
+  name: "ComebackAction",
+  components: {ActionButtons},
   props: {
     car: {
       type: Object,
