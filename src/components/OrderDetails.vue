@@ -2,44 +2,44 @@
   <div>
     <div class="row">
       <div class="col s4">
-        <strong>Марка:</strong> {{ car.manufacturer }}
+        <strong>Марка:</strong> {{ order.car.manufacturer }}
       </div>
       <div class="col s4">
-        <strong>Модель:</strong> {{ car.model }}
+        <strong>Модель:</strong> {{ order.car.model }}
       </div>
       <div class="col s4">
-        <strong>Гос.номер:</strong> {{ car.gov_id }}
+        <strong>Гос.номер:</strong> {{ order.car.gov_id }}
       </div>
     </div>
     <div class="row">
       <div class="col s4">
-        <strong>Ф.И.О. владельца:</strong> {{ car.owner_fullname }}
+        <strong>Ф.И.О. владельца:</strong> {{ getFullname(order.customer) }}
       </div>
       <div class="col s4">
-        <strong>Телефон:</strong> {{ car.owner_phone }}
+        <strong>Телефон:</strong> {{ order.customer.phone }}
       </div>
       <div class="col s4">
-        <strong>Статус:</strong> {{ statuses[car.status] }}
+        <strong>Статус:</strong> {{ statuses[order.status] }}
       </div>
     </div>
     <div class="row">
       <div class="col s4">
         <div><strong>Заезд:</strong></div>
-        {{new Date(car.registered_at).toLocaleString()}}
+        {{ new Date(order.created_at).toLocaleString() }}
       </div>
       <div class="col s4">
         <div><strong>Предоплата истекает:</strong></div>
-        {{ car.prepay_expires_at ? new Date(car.prepay_expires_at).toLocaleString() : '-' }}
+        {{ order.prepay_expires_at ? new Date(order.prepay_expires_at).toLocaleString() : '-' }}
       </div>
       <div class="col s4">
         <div><strong>На стоянке уже:</strong></div>
-        {{ daysSpent(car) }} дней
+        {{ daysSpent(order) }} дней
       </div>
     </div>
     <div class="row">
       <div class="col s12">
         <div><strong>К оплате:</strong></div>
-        {{ hoursSpent(car) * (car.rate / 24) }} рублей
+        {{ hoursSpent(order) * (order.daily_rate / 24) }} рублей
       </div>
     </div>
   </div>
@@ -51,7 +51,7 @@ import moment from 'moment';
 export default {
   name: "OrderDetails",
   props: {
-    car: {
+    order: {
       type: Object,
       required: true
     },
@@ -61,20 +61,19 @@ export default {
     }
   },
   methods: {
-    hoursSpent(car) {
+    hoursSpent(order) {
       moment.locale('ru');
-      let regTime = moment(car.registered_at);
+      let regTime = moment(order.created_at);
       let curTime = moment();
       let duration = moment.duration(curTime.diff(regTime));
       return Math.round(duration.asHours());
     },
-    daysSpent(car) {
-      return this.hoursSpent(car) / 24;
+    daysSpent(order) {
+      return this.hoursSpent(order) / 24;
     },
+    getFullname(customer) {
+      return `${customer.last_name} ${customer.first_name} ${customer.middle_name}`
+    }
   }
 }
 </script>
-
-<style scoped>
-
-</style>

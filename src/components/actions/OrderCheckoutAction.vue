@@ -1,7 +1,7 @@
 <template>
   <div>
     Рассчитать? Итоговая сумма
-    <order-details :car="car" :statuses="statuses"></order-details>
+    <order-details :order="order" :statuses="statuses"></order-details>
     <action-buttons
         @action:commit="commitAction"
         @action:cancel="$emit('action:cancel')"></action-buttons>
@@ -19,11 +19,11 @@ export default {
     OrderDetails
   },
   props: {
-    car: {
+    order: {
       type: Object,
       required: true
     },
-    cars: {
+    orders: {
       type: Array,
       required: true
     },
@@ -34,8 +34,8 @@ export default {
   },
   methods: {
     commitAction() {
-      let idx = this.cars.findIndex((c) => c.owner_fullname === this.car.owner_fullname);
-      this.cars.splice(idx, 1);
+      let idx = this.orders.findIndex((order) => order.customer.phone === this.order.customer.phone);
+      this.orders.splice(idx, 1);
       this.$emit('action:commit');
     }
   }

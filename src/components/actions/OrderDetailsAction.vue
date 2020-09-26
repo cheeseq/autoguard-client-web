@@ -1,6 +1,6 @@
 <template>
   <div>
-    <order-details :car="car" :statuses="statuses"></order-details>
+    <order-details :order="order" :statuses="statuses"></order-details>
     <action-buttons
         @action:commit="$emit('action:commit')"
         @action:cancel="$emit('action:cancel')"></action-buttons>
@@ -15,7 +15,7 @@ export default {
   name: "OrderDetailsAction",
   components: {ActionButtons, OrderDetails},
   props: {
-    car: {
+    order: {
       type: Object,
       required: true
     },

@@ -23,20 +23,22 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="car of cars" v-bind:key="car.owner_phone" :class="{'red lighten-4': isDebtor(car), 'grey lighten-3': isLeftPrepayer(car)}">
-            <td>{{ car.manufacturer }} {{ car.model }}</td>
-            <td>{{ car.gov_id }}</td>
-            <td>{{ car.owner_fullname }}</td>
-            <td>{{ car.owner_phone }}</td>
-            <td>{{ new Date(car.registered_at).toLocaleString() }}</td>
-            <td>{{ car.prepay_expires_at ? new Date(car.prepay_expires_at).toLocaleString() : '-' }}</td>
-            <td><span :class="{'red-text': isDebtor(car)}">{{ statuses[car.status] }}</span></td>
+          <tr v-for="order of orders" :key="order.customer.phone  "
+              :class="{'red lighten-4': isDebtor(order), 'grey lighten-3': isLeftPrepayer(order)}">
+            <td>{{ order.car.manufacturer }} {{ order.car.model }}</td>
+            <td>{{ order.car.gov_id }}</td>
+            <td>{{ getFullname(order.customer) }}</td>
+            <td>{{ order.customer.phone }}</td>
+            <td>{{ new Date(order.created_at).toLocaleString() }}</td>
+            <td>{{ order.prepay_expires_at ? new Date(order.prepay_expires_at).toLocaleString() : '-' }}</td>
+            <td><span :class="{'red-text': isDebtor(order)}">{{ statuses[order.status] }}</span></td>
             <td>
-              <div><a href="#" @click="setAction('order-details-action', car)">Подробно</a></div>
-              <div v-if="isUnpaid(car) || isDebtor(car)"><a href="#" @click="setAction('order-checkout-action', car)">Расчет</a>
+              <div><a href="#" @click="setAction('order-details-action', order)">Подробно</a></div>
+              <div v-if="isUnpaid(order) || isDebtor(order)"><a href="#"
+                                                                @click="setAction('order-checkout-action', order)">Расчет</a>
               </div>
-              <div v-if="isPrepayer(car)"><a href="#" @click="setAction('temp-leave-action', car)">Выезд</a></div>
-              <div v-if="isLeftPrepayer(car)"><a href="#" @click="setAction('comeback-action', car)">Заезд</a></div>
+              <div v-if="isPrepayer(order)"><a href="#" @click="setAction('temp-leave-action', order)">Выезд</a></div>
+              <div v-if="isLeftPrepayer(order)"><a href="#" @click="setAction('comeback-action', order)">Заезд</a></div>
             </td>
           </tr>
           </tbody>
@@ -55,8 +57,8 @@
       <div style="padding: 2rem;">
         <component
             :is="currentAction"
-            :car="selectedCar"
-            :cars="cars"
+            :order="selectedOrder"
+            :orders="orders"
             :statuses="statuses"
             :daily-rates="[80, 130, 170]"
             @action:cancel="cancelAction"
@@ -70,7 +72,7 @@
 
 <script>
 import "materialize-css/dist/css/materialize.min.css";
-import RegisterCarAction from "@/components/actions/RegisterCarAction";
+import RegisterCarAction from "@/components/actions/OrderCreateAction";
 import OrderDetailsAction from "@/components/actions/OrderDetailsAction";
 import OrderCheckoutAction from "@/components/actions/OrderCheckoutAction";
 import TempLeaveAction from "@/components/actions/TempLeaveAction";
@@ -82,41 +84,68 @@ export default {
   data() {
     return {
       currentAction: null,
-      selectedCar: null,
+      selectedOrder: null,
       statuses: {
         1: "Не оплачен",
         2: "Должник",
         3: "Предоплата",
         4: "Предоплата (выехал)",
       },
-      cars: [
+      orders: [
         {
-          "manufacturer": "Hyundai",
-          "model": "Solaris",
-          "gov_id": "АА111А",
-          "owner_fullname": "Иванов Иван Иванович",
-          "owner_phone": "+7 999 999 99 99",
-          "registered_at": new Date(2020, 7, 25, 11, 1),
+          "type": 1,
+          "status": 1,
+          "created_at": new Date(2020, 7, 25, 11, 1),
+          "updated_at": new Date(2020, 7, 25, 11, 1),
           "expires_at": new Date(2020, 8, 6, 21, 44),
           "prepay_expires_at": null,
-          "status": 1,
-          "note": null,
-          "rate": 80
+          "daily_rate": 80,
+          "car": {
+            "manufacturer": "Hyundai",
+            "model": "Solaris",
+            "gov_id": "АА111А",
+          },
+          "customer": {
+            "last_name": "Иванов",
+            "first_name": "Иван",
+            "middle_name": "Иванович",
+            "phone": "+7 999 999 99 99"
+          },
+          "events": [
+            {
+              "description": "Зарегистрирован",
+              "created_at": new Date(2020, 7, 25, 11, 1),
+              "note": null,
+            }
+          ]
         },
         {
-          "manufacturer": "Hyundai",
-          "model": "Solaris",
-          "gov_id": "АА111А",
-          "owner_fullname": "Предпоплатник",
-          "owner_phone": "+7 999 999 99 99",
-          "registered_at": new Date(2020, 7, 6, 21, 25),
-          "expires_at": new Date(2020, 9, 6, 11, 1),
-          "prepay_expires_at": new Date(2020, 9, 6, 21, 26),
-          "temp_left_at": null, //когда отъехал предоплатник
+          "type": 1,
           "status": 3,
-          "note": null,
-          "rate": 80
-        }
+          "created_at": new Date(2020, 7, 25, 11, 1),
+          "updated_at": new Date(2020, 7, 25, 11, 1),
+          "expires_at": new Date(2020, 11, 6, 21, 44),
+          "prepay_expires_at": new Date(2020, 10, 6, 21, 44),
+          "daily_rate": 130,
+          "car": {
+            "manufacturer": "Газель",
+            "model": "21",
+            "gov_id": "ББ111Б",
+          },
+          "customer": {
+            "last_name": "Петров",
+            "first_name": "Петр",
+            "middle_name": "Петрович",
+            "phone": "+7 999 999 99 98"
+          },
+          "events": [
+            {
+              "description": "Зарегистрирован",
+              "created_at": new Date(2020, 7, 25, 11, 1),
+              "note": null,
+            }
+          ]
+        },
       ],
       owner_deadline: 86400 * 30,
     }
@@ -126,32 +155,32 @@ export default {
     //@todo fetch owner deadline
     setInterval(() => {
       let currentDate = new Date();
-      for (let car of this.cars) {
+      for (let order of this.orders) {
         console.log(currentDate.getMinutes(), currentDate.getSeconds());
-        if (car.status === 1 && car.expires_at < currentDate) {
-          car.status = 2;
-        } else if (car.status === 3 && (car.prepay_expires_at < currentDate)) {
-          car.status = 1;
+        if (order.status === 1 && order.expires_at < currentDate) {
+          order.status = 2;
+        } else if (order.status === 3 && (order.prepay_expires_at < currentDate)) {
+          order.status = 1;
         }
       }
     }, 60000);
   },
   methods: {
-    isUnpaid(car) {
-      return car.status === 1;
+    isUnpaid(order) {
+      return order.status === 1;
     },
-    isDebtor(car) {
-      return car.status === 2;
+    isDebtor(order) {
+      return order.status === 2;
     },
-    isPrepayer(car) {
-      return car.status === 3;
+    isPrepayer(order) {
+      return order.status === 3;
     },
-    isLeftPrepayer(car) {
-      return car.status === 4;
+    isLeftPrepayer(order) {
+      return order.status === 4;
     },
-    setAction(actionName, car) {
+    setAction(actionName, order) {
       this.currentAction = actionName;
-      this.selectedCar = car;
+      this.selectedOrder = order;
       this.openActionModal();
     },
     cancelAction() {
@@ -165,6 +194,9 @@ export default {
     },
     closeActionModal() {
       this.$modal.hide('action-modal');
+    },
+    getFullname(customer) {
+      return `${customer.last_name} ${customer.first_name} ${customer.middle_name}`
     }
   }
 }

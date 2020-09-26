@@ -17,15 +17,15 @@ export default {
   name: "TempLeaveAction",
   components: {ActionButtons},
   props: {
-    car: {
+    order: {
       type: Object,
       required: true
     }
   },
   methods: {
     commitAction() {
-      this.car.temp_left_at = new Date();
-      this.car.status = 4;
+      this.order.temp_left_at = new Date();
+      this.order.status = 4;
       this.$emit('action:commit');
     }
   }
