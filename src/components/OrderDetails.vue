@@ -33,7 +33,13 @@
       </div>
       <div class="col s4">
         <div><strong>На стоянке уже:</strong></div>
-        {{ registeredTime(car) }}
+        {{ daysSpent(car) }} дней
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s12">
+        <div><strong>К оплате:</strong></div>
+        {{ hoursSpent(car) * (car.rate / 24) }} рублей
       </div>
     </div>
   </div>
@@ -55,13 +61,16 @@ export default {
     }
   },
   methods: {
-    registeredTime(car) {
+    hoursSpent(car) {
       moment.locale('ru');
       let regTime = moment(car.registered_at);
       let curTime = moment();
       let duration = moment.duration(curTime.diff(regTime));
-      return Math.round(duration.asDays()) + " дней";
-    }
+      return Math.round(duration.asHours());
+    },
+    daysSpent(car) {
+      return this.hoursSpent(car) / 24;
+    },
   }
 }
 </script>

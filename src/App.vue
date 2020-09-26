@@ -100,7 +100,8 @@ export default {
           "expires_at": new Date(2020, 8, 6, 21, 44),
           "prepay_expires_at": null,
           "status": 1,
-          "note": null
+          "note": null,
+          "rate": 80
         },
         {
           "manufacturer": "Hyundai",
@@ -113,7 +114,8 @@ export default {
           "prepay_expires_at": new Date(2020, 9, 6, 21, 26),
           "temp_left_at": null, //когда отъехал предоплатник
           "status": 3,
-          "note": null
+          "note": null,
+          "rate": 80
         }
       ],
       owner_deadline: 86400 * 30,
