@@ -1,7 +1,7 @@
 <template>
   <div>
     Рассчитать? Итоговая сумма
-    <order-details :order="order" :statuses="statuses"></order-details>
+    <order-details :order="order"></order-details>
     <action-buttons
         @action:commit="commitAction"
         @action:cancel="$emit('action:cancel')"></action-buttons>
@@ -11,6 +11,8 @@
 <script>
 import OrderDetails from "@/components/OrderDetails";
 import ActionButtons from "@/components/ActionButtons";
+import {mapState} from 'vuex';
+
 
 export default {
   name: "OrderCheckoutAction",
@@ -23,14 +25,11 @@ export default {
       type: Object,
       required: true
     },
-    orders: {
-      type: Array,
-      required: true
-    },
-    statuses: {
-      type: Object,
-      required: true
-    }
+  },
+  computed: {
+    ...mapState([
+      'orders',
+    ])
   },
   methods: {
     commitAction() {

@@ -127,6 +127,7 @@ import 'vue2-datepicker/index.css';
 import 'vue2-datepicker/locale/ru'
 import {required, requiredIf} from "vuelidate/lib/validators";
 import ActionButtons from "@/components/ActionButtons";
+import {mapState} from 'vuex';
 
 const _MS_PER_HOUR = 1000 * 60 * 60;
 
@@ -136,23 +137,13 @@ export default {
     ActionButtons,
     DatePicker
   },
-  props: {
-    orders: {
-      type: Array,
-      required: true
-    },
-    dailyRates: {
-      type: Array,
-      required: true
-    }
-  },
   data() {
     return {
       is_prepay: false,
       order: {
         "prepay_expires_at": null,
         "prepay_sum": null,
-        "daily_rate": this.dailyRates[0],
+        "daily_rate": 80,
         "car": {
           "manufacturer": null,
           "model": null,
@@ -175,7 +166,11 @@ export default {
   computed: {
     hourlyRate() {
       return this.order.daily_rate / 24;
-    }
+    },
+    ...mapState([
+      'orders',
+      'dailyRates'
+    ])
   },
   mounted() {
     this.onPrepayExpiresAtChange(new Date(new Date().getTime() + (24 * _MS_PER_HOUR)));

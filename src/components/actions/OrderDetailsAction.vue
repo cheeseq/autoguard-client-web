@@ -1,6 +1,6 @@
 <template>
   <div>
-    <order-details :order="order" :statuses="statuses"></order-details>
+    <order-details :order="order"></order-details>
     <action-buttons
         @action:commit="$emit('action:commit')"
         @action:cancel="$emit('action:cancel')"></action-buttons>
@@ -19,10 +19,6 @@ export default {
       type: Object,
       required: true
     },
-    statuses: {
-      type: Object,
-      required: true
-    }
   },
 }
 </script>

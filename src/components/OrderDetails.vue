@@ -47,6 +47,7 @@
 
 <script>
 import moment from 'moment';
+import {mapState} from "vuex";
 
 export default {
   name: "OrderDetails",
@@ -55,10 +56,11 @@ export default {
       type: Object,
       required: true
     },
-    statuses: {
-      type: Object,
-      required: true
-    }
+  },
+  computed: {
+    ...mapState([
+      'statuses'
+    ])
   },
   methods: {
     hoursSpent(order) {
