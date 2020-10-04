@@ -2,7 +2,7 @@
   <div id="app" style="padding-top: 2rem;">
     <div class="row">
       <div class="col s12">
-        <button class="btn" @click="setAction('register-car-action')">Добавить авто</button>
+        <button class="btn" @click="setAction('order-create-action')">Добавить авто</button>
       </div>
     </div>
 
@@ -23,7 +23,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="order of orders" :key="order.customer.phone  "
+          <tr v-for="order of orders" :key="order.customer.phone"
               :class="{'red lighten-4': isDebtor(order), 'grey lighten-3': isLeftPrepayer(order)}">
             <td>{{ order.car.manufacturer }} {{ order.car.model }}</td>
             <td>{{ order.car.gov_id }}</td>
@@ -69,7 +69,7 @@
 
 <script>
 import "materialize-css/dist/css/materialize.min.css";
-import RegisterCarAction from "@/components/actions/OrderCreateAction";
+import OrderCreateAction from "@/components/actions/OrderCreateAction";
 import OrderDetailsAction from "@/components/actions/OrderDetailsAction";
 import OrderCheckoutAction from "@/components/actions/OrderCheckoutAction";
 import TempLeaveAction from "@/components/actions/TempLeaveAction";
@@ -78,7 +78,7 @@ import {mapState} from 'vuex';
 
 export default {
   name: 'App',
-  components: {RegisterCarAction, OrderDetailsAction, OrderCheckoutAction, TempLeaveAction, ComebackAction},
+  components: {OrderCreateAction, OrderDetailsAction, OrderCheckoutAction, TempLeaveAction, ComebackAction},
   data() {
     return {
       currentAction: null,
@@ -90,7 +90,8 @@ export default {
     ...mapState([
       'statuses',
       'orders',
-      'dailyRates'
+      'dailyRates',
+      'actionEvents'
     ])
   },
   mounted() {
@@ -129,8 +130,18 @@ export default {
     cancelAction() {
       this.closeActionModal();
     },
-    commitAction() {
+    commitAction(event) {
+      if (event) {
+        this.selectedOrder.events.push({
+          "description": this.resolveEventDescription(),
+          "created_at": new Date(),
+          "note": event.note,
+        });
+      }
       this.closeActionModal();
+    },
+    resolveEventDescription() {
+      return this.actionEvents[this.currentAction] || 'Неизвестное действие';
     },
     openActionModal() {
       this.$modal.show('action-modal');

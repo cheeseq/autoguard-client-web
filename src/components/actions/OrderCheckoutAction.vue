@@ -2,6 +2,13 @@
   <div>
     Рассчитать? Итоговая сумма
     <order-details :order="order"></order-details>
+    <div class="row">
+      <div class="col s12">
+        <div class="input-field">
+          <textarea id="note" class="materialize-textarea" v-model="note" placeholder="Комментарий"></textarea>
+        </div>
+      </div>
+    </div>
     <action-buttons
         @action:commit="commitAction"
         @action:cancel="$emit('action:cancel')"></action-buttons>
@@ -20,6 +27,11 @@ export default {
     ActionButtons,
     OrderDetails
   },
+  data() {
+    return {
+      note: null
+    }
+  },
   props: {
     order: {
       type: Object,
@@ -34,8 +46,8 @@ export default {
   methods: {
     commitAction() {
       let idx = this.orders.findIndex((order) => order.customer.phone === this.order.customer.phone);
+      this.$emit('action:commit', {note: this.note});
       this.orders.splice(idx, 1);
-      this.$emit('action:commit');
     }
   }
 }

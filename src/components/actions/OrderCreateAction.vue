@@ -110,7 +110,7 @@
     <div class="row">
       <div class="col s12">
         <div class="input-field">
-          <textarea id="note" class="materialize-textarea" v-model="order.note" placeholder="Комментарий"></textarea>
+          <textarea id="note" class="materialize-textarea" v-model="note" placeholder="Комментарий"></textarea>
         </div>
       </div>
     </div>
@@ -140,6 +140,7 @@ export default {
   data() {
     return {
       is_prepay: false,
+      note: null,
       order: {
         "prepay_expires_at": null,
         "prepay_sum": null,
@@ -155,6 +156,7 @@ export default {
           "middle_name": null,
           "phone": null,
         },
+        "events": []
       },
     }
   },
@@ -219,6 +221,11 @@ export default {
         //@todo add to local queue
         //@todo send to api
         this.orders.push(this.order);
+        this.order.events.push({
+          "description": 'Машина зарегистрирована',
+          "created_at": new Date(),
+          "note": this.note,
+        });
 
         this.$emit("action:commit");
       }

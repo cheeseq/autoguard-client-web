@@ -11,6 +11,12 @@ export default new Vuex.Store({
       3: "Предоплата",
       4: "Предоплата (выехал)",
     },
+    actionEvents: {
+      'temp-leave-action': 'Временный выезд предоплатника',
+      'order-checkout-action': 'Расчет',
+      'comeback-action': 'Возврат предоплатника из временного отъезда',
+      'register-car-action': 'Машина зарегистрирована'
+    },
     orders: [
       {
         "type": 1,
