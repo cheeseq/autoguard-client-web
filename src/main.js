@@ -3,6 +3,7 @@ import App from './App.vue';
 import VModal from 'vue-js-modal';
 import Vuelidate from "vuelidate/src";
 import VueMask from 'v-mask';
+import VueFilterDateFormat from '@vuejs-community/vue-filter-date-format';
 import store from "@/store";
 
 
@@ -14,6 +15,7 @@ Vue.use(VueMask, {
     Я: /[\wа-яА-Я]/
   }
 });
+Vue.use(VueFilterDateFormat);
 
 new Vue({
   store,

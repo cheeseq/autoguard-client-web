@@ -1,6 +1,7 @@
 <template>
   <div>
     <order-details :order="order"></order-details>
+    <order-events :order="order"></order-events>
     <action-buttons
         @action:commit="$emit('action:commit')"
         @action:cancel="$emit('action:cancel')"></action-buttons>
@@ -10,10 +11,11 @@
 <script>
 import OrderDetails from "@/components/OrderDetails";
 import ActionButtons from "@/components/ActionButtons";
+import OrderEvents from "@/components/OrderEvents";
 
 export default {
   name: "OrderDetailsAction",
-  components: {ActionButtons, OrderDetails},
+  components: {OrderEvents, ActionButtons, OrderDetails},
   props: {
     order: {
       type: Object,

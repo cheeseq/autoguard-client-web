@@ -9,6 +9,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vuejs-community/vue-filter-date-format": "^1.6.2",
     "core-js": "^3.6.5",
     "materialize-css": "^1.0.0",
     "moment": "^2.28.0",
