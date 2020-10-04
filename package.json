@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@vuejs-community/vue-filter-date-format": "^1.6.2",
+    "axios": "^0.20.0",
     "core-js": "^3.6.5",
     "materialize-css": "^1.0.0",
     "moment": "^2.28.0",
+    "uuid": "^8.3.1",
     "v-mask": "^2.2.3",
     "vue": "^2.6.11",
     "vue-js-modal": "^2.0.0-rc.6",

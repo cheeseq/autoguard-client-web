@@ -75,6 +75,7 @@ import OrderCheckoutAction from "@/components/actions/OrderCheckoutAction";
 import TempLeaveAction from "@/components/actions/TempLeaveAction";
 import ComebackAction from "@/components/actions/ComebackAction";
 import {mapState} from 'vuex';
+import APIService from "@/APIService";
 
 export default {
   name: 'App',
@@ -132,6 +133,9 @@ export default {
     },
     commitAction(event) {
       if (event) {
+        APIService.sendAction(this.currentAction, event);
+      }
+      if (event && event.note) {
         this.selectedOrder.events.push({
           "description": this.resolveEventDescription(),
           "created_at": new Date(),

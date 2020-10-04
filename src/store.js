@@ -15,7 +15,7 @@ export default new Vuex.Store({
       'temp-leave-action': 'Временный выезд предоплатника',
       'order-checkout-action': 'Расчет',
       'comeback-action': 'Возврат предоплатника из временного отъезда',
-      'register-car-action': 'Машина зарегистрирована'
+      'order-create-action': 'Машина зарегистрирована'
     },
     orders: [
       {

@@ -128,6 +128,7 @@ import 'vue2-datepicker/locale/ru'
 import {required, requiredIf} from "vuelidate/lib/validators";
 import ActionButtons from "@/components/ActionButtons";
 import {mapState} from 'vuex';
+import {v4 as uuidv4} from 'uuid';
 
 const _MS_PER_HOUR = 1000 * 60 * 60;
 
@@ -214,12 +215,11 @@ export default {
     addOrder() {
       this.$v.$touch();
       if (!this.$v.$invalid) {
+        this.order.id = uuidv4();
         this.order.created_at = new Date();
         this.order.expires_at = new Date().setMonth(new Date().getMonth() + 1);
         this.order.type = 1;
         this.order.status = 1;
-        //@todo add to local queue
-        //@todo send to api
         this.orders.push(this.order);
         this.order.events.push({
           "description": 'Машина зарегистрирована',

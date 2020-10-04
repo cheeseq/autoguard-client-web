@@ -46,7 +46,7 @@ export default {
   methods: {
     commitAction() {
       let idx = this.orders.findIndex((order) => order.customer.phone === this.order.customer.phone);
-      this.$emit('action:commit', {note: this.note});
+      this.$emit('action:commit', {order: this.order, note: this.note});
       this.orders.splice(idx, 1);
     }
   }
