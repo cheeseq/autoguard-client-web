@@ -2,34 +2,40 @@
   <div>
     <div class="row">
       <div class="col s4">
-        <strong>Марка:</strong> {{ order.car.manufacturer }}
+        <div><strong>Марка:</strong></div>
+        {{ order.car.manufacturer }}
       </div>
       <div class="col s4">
-        <strong>Модель:</strong> {{ order.car.model }}
+        <div><strong>Модель:</strong></div>
+        {{ order.car.model }}
       </div>
       <div class="col s4">
-        <strong>Гос.номер:</strong> {{ order.car.gov_id }}
+        <div><strong>Гос.номер:</strong></div>
+        {{ order.car.gov_id }}
       </div>
     </div>
     <div class="row">
       <div class="col s4">
-        <strong>Ф.И.О. владельца:</strong> {{ getFullname(order.customer) }}
+        <div><strong>Ф.И.О. владельца:</strong></div>
+        {{ getFullname(order.customer) }}
       </div>
       <div class="col s4">
-        <strong>Телефон:</strong> {{ order.customer.phone }}
+        <div><strong>Телефон:</strong></div>
+        {{ order.customer.phone }}
       </div>
       <div class="col s4">
-        <strong>Статус:</strong> {{ statuses[order.status] }}
+        <div><strong>Статус:</strong></div>
+        {{ order.status.name }}
       </div>
     </div>
     <div class="row">
       <div class="col s4">
         <div><strong>Заезд:</strong></div>
-        {{ new Date(order.created_at).toLocaleString() }}
+        {{ order.created_at.toDate().toLocaleString() }}
       </div>
       <div class="col s4">
         <div><strong>Предоплата истекает:</strong></div>
-        {{ order.prepay_expires_at ? new Date(order.prepay_expires_at).toLocaleString() : '-' }}
+        {{ order.prepay_expires_at ? order.prepay_expires_at.toDate().toLocaleString() : '-' }}
       </div>
       <div class="col s4">
         <div><strong>На стоянке уже:</strong></div>
@@ -57,18 +63,12 @@ export default {
       required: true
     },
   },
-  computed: {
-    ...mapState([
-      'statuses'
-    ])
-  },
   methods: {
     hoursSpent(order) {
       moment.locale('ru');
-      let regTime = moment(order.created_at);
-      let curTime = moment();
-      let duration = moment.duration(curTime.diff(regTime));
-      return Math.round(duration.asHours());
+      let regTime = moment(order.created_at.toDate());
+      let duration = moment().diff(regTime, 'hours', true);
+      return Math.round(duration);
     },
     daysSpent(order) {
       return this.hoursSpent(order) / 24;

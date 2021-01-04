@@ -9,9 +9,9 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="event of order.events" :key="event.created_at">
-        <td>{{ event.description }}</td>
-        <td>{{ event.created_at | dateFormat('DD.MM.YYYY HH:mm:ss') }}</td>
+      <tr v-for="(event, idx) of order.events" :key="idx">
+        <td>{{ event.descriptor.name }}</td>
+        <td>{{ event.created_at.toDate().toLocaleString() }}</td>
         <td>{{ event.note }}</td>
       </tr>
       </tbody>
@@ -29,11 +29,6 @@ export default {
       type: Object,
       required: true
     },
-  },
-  computed: {
-    ...mapState([
-      'statuses'
-    ])
   },
 }
 </script>

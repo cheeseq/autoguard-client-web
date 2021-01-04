@@ -99,11 +99,11 @@
 
     <div class="row">
       <div class="col s12">
-        <select class="browser-default" v-model="order.daily_rate">
-          <option v-for="dailyRate of dailyRates" :value="dailyRate" :key="dailyRate">Тариф: {{ dailyRate }}
-            рублей/сутки
-          </option>
-        </select>
+          <select class="browser-default" v-model="order.daily_rate">
+            <option v-for="dailyRate of dailyRates" :value="dailyRate" :key="dailyRate">Тариф: {{ dailyRate }}
+              рублей/сутки
+            </option>
+          </select>
       </div>
     </div>
 
@@ -127,10 +127,10 @@ import 'vue2-datepicker/index.css';
 import 'vue2-datepicker/locale/ru'
 import {required, requiredIf} from "vuelidate/lib/validators";
 import ActionButtons from "@/components/ActionButtons";
-import {mapState} from 'vuex';
+import {mapActions, mapState} from 'vuex';
 import {v4 as uuidv4} from 'uuid';
-
-const _MS_PER_HOUR = 1000 * 60 * 60;
+import {db} from '@/db';
+import moment from 'moment';
 
 export default {
   name: "OrderCreateAction",
@@ -164,6 +164,9 @@ export default {
   watch: {
     'order.daily_rate': function () {
       this.onPrepayExpiresAtChange(this.order.prepay_expires_at);
+    },
+    'is_prepay': function () {
+      this.onPrepayExpiresAtChange(moment().add(1, 'days').toDate());
     }
   },
   computed: {
@@ -174,9 +177,6 @@ export default {
       'orders',
       'dailyRates'
     ])
-  },
-  mounted() {
-    this.onPrepayExpiresAtChange(new Date(new Date().getTime() + (24 * _MS_PER_HOUR)));
   },
   validations: {
     is_prepay: {},
@@ -212,46 +212,38 @@ export default {
     }
   },
   methods: {
-    addOrder() {
+    ...mapActions([
+      'storeOrder'
+    ]),
+    async addOrder() {
       this.$v.$touch();
       if (!this.$v.$invalid) {
-        this.order.id = uuidv4();
-        this.order.created_at = new Date();
-        this.order.expires_at = new Date().setMonth(new Date().getMonth() + 1);
-        this.order.type = 1;
-        this.order.status = 1;
-        this.orders.push(this.order);
-        this.order.events.push({
-          "description": 'Машина зарегистрирована',
-          "created_at": new Date(),
-          "note": this.note,
-        });
+        this.order.created_at = moment().toDate();
+        this.order.expires_at = moment().add(1, 'months').toDate();
+        this.order.type = db.collection('settings/enums/order-types').doc('car-parking');
+        this.order.status = db.collection('settings/enums/order-statuses').doc('unpaid');
 
-        this.$emit("action:commit");
+        try {
+          await this.storeOrder(this.order);
+        } finally {
+          this.$emit("action:commit");
+        }
       }
-    },
-    dateDiffInHours(a, b) {
-      // Discard the time and time-zone information.
-      const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate(), a.getHours(), a.getMinutes(), a.getSeconds(), a.getMilliseconds());
-      const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate(), b.getHours(), b.getMinutes(), b.getSeconds(), b.getMilliseconds());
-
-      return Math.ceil((utc2 - utc1) / _MS_PER_HOUR);
     },
     onPrepaySumChange(newValue) {
       newValue = newValue.target.value;
-      let addHours = (newValue / this.hourlyRate) * _MS_PER_HOUR;
-      let millis = Date.now() + addHours;
-      this.order.prepay_expires_at = new Date(millis);
+      let addHours = newValue / this.hourlyRate;
+      this.order.prepay_expires_at = moment().add(addHours, 'hours').toDate();
       this.order.prepay_sum = Math.round(newValue);
+
       this.$v.order.prepay_sum.$touch();
       this.$v.order.prepay_expires_at.$touch();
     },
     onPrepayExpiresAtChange(newValue) {
-      console.log(newValue);
-      let currDate = new Date();
-      let diff = this.dateDiffInHours(currDate, newValue);
-      this.order.prepay_sum = Math.round(diff * this.hourlyRate);
+      let diffHours = Math.round(moment(newValue).diff(moment(), 'hours', true));
+      this.order.prepay_sum = Math.round(diffHours * this.hourlyRate);
       this.order.prepay_expires_at = newValue;
+
       this.$v.order.prepay_expires_at.$touch();
       this.$v.order.prepay_sum.$touch();
     },

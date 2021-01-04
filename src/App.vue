@@ -23,24 +23,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="order of orders" :key="order.customer.phone"
-              :class="{'red lighten-4': isDebtor(order), 'grey lighten-3': isLeftPrepayer(order)}">
-            <td>{{ order.car.manufacturer }} {{ order.car.model }}</td>
-            <td>{{ order.car.gov_id }}</td>
-            <td>{{ getFullname(order.customer) }}</td>
-            <td>{{ order.customer.phone }}</td>
-            <td>{{ new Date(order.created_at).toLocaleString() }}</td>
-            <td>{{ order.prepay_expires_at ? new Date(order.prepay_expires_at).toLocaleString() : '-' }}</td>
-            <td><span :class="{'red-text': isDebtor(order)}">{{ statuses[order.status] }}</span></td>
-            <td>
-              <div><a href="#" @click="setAction('order-details-action', order)">Подробно</a></div>
-              <div v-if="isUnpaid(order) || isDebtor(order)"><a href="#"
-                                                                @click="setAction('order-checkout-action', order)">Расчет</a>
-              </div>
-              <div v-if="isPrepayer(order)"><a href="#" @click="setAction('temp-leave-action', order)">Выезд</a></div>
-              <div v-if="isLeftPrepayer(order)"><a href="#" @click="setAction('comeback-action', order)">Заезд</a></div>
-            </td>
-          </tr>
+            <order-row v-for="order of orders" :key="order.id" :order="order" @set-action="setActionFromEvent"/>
           </tbody>
         </table>
       </div>
@@ -57,7 +40,7 @@
       <div style="padding: 2rem;">
         <component
             :is="currentAction"
-            :order="selectedOrder"
+            :order="currentActionOrder"
             @action:cancel="cancelAction"
             @action:commit="commitAction"
         ></component>
@@ -74,28 +57,31 @@ import OrderDetailsAction from "@/components/actions/OrderDetailsAction";
 import OrderCheckoutAction from "@/components/actions/OrderCheckoutAction";
 import TempLeaveAction from "@/components/actions/TempLeaveAction";
 import ComebackAction from "@/components/actions/ComebackAction";
-import {mapState} from 'vuex';
-import APIService from "@/APIService";
+import OrderRow from "@/components/OrderRow";
+import {mapActions, mapMutations, mapState} from 'vuex';
 
 export default {
   name: 'App',
-  components: {OrderCreateAction, OrderDetailsAction, OrderCheckoutAction, TempLeaveAction, ComebackAction},
+  components: {OrderRow, OrderCreateAction, OrderDetailsAction, OrderCheckoutAction, TempLeaveAction, ComebackAction},
   data() {
     return {
-      currentAction: null,
-      selectedOrder: null,
       owner_deadline: 86400 * 30,
     }
   },
   computed: {
     ...mapState([
-      'statuses',
       'orders',
+      'currentAction',
+      'currentActionOrder',
       'dailyRates',
       'actionEvents'
+    ]),
+    ...mapMutations([
+      'setCurrentAction'
     ])
   },
-  mounted() {
+  async mounted() {
+    await this.bindOrders();
     //@todo fetch cars from api
     //@todo fetch owner deadline
     setInterval(() => {
@@ -111,41 +97,27 @@ export default {
     }, 60000);
   },
   methods: {
-    isUnpaid(order) {
-      return order.status === 1;
-    },
-    isDebtor(order) {
-      return order.status === 2;
-    },
-    isPrepayer(order) {
-      return order.status === 3;
-    },
-    isLeftPrepayer(order) {
-      return order.status === 4;
-    },
+    ...mapActions([
+      'bindOrders',
+      'bindStatuses',
+    ]),
     setAction(actionName, order) {
-      this.currentAction = actionName;
-      this.selectedOrder = order;
+      this.$store.commit('setCurrentActionOrder', order);
+      this.$store.commit('setCurrentAction', actionName);
       this.openActionModal();
     },
+    setActionFromEvent($e) {
+      this.setAction($e.name, $e.order);
+    },
     cancelAction() {
+      this.$store.commit('setCurrentAction', null);
+      this.$store.commit('setCurrentActionOrder', null);
       this.closeActionModal();
     },
-    commitAction(event) {
-      if (event) {
-        APIService.sendAction(this.currentAction, event);
-      }
-      if (event && event.note) {
-        this.selectedOrder.events.push({
-          "description": this.resolveEventDescription(),
-          "created_at": new Date(),
-          "note": event.note,
-        });
-      }
+    commitAction() {
+      this.$store.commit('setCurrentAction', null);
+      this.$store.commit('setCurrentActionOrder', null);
       this.closeActionModal();
-    },
-    resolveEventDescription() {
-      return this.actionEvents[this.currentAction] || 'Неизвестное действие';
     },
     openActionModal() {
       this.$modal.show('action-modal');
@@ -153,9 +125,6 @@ export default {
     closeActionModal() {
       this.$modal.hide('action-modal');
     },
-    getFullname(customer) {
-      return `${customer.last_name} ${customer.first_name} ${customer.middle_name}`
-    }
   }
 }
 </script>

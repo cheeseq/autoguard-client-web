@@ -1,83 +1,59 @@
 import Vue from 'vue';
-import Vuex from 'vuex'
-
-Vue.use(Vuex)
+import Vuex from 'vuex';
+import { vuexfireMutations, firestoreAction } from 'vuexfire';
+import { db } from './db';
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    statuses: {
-      1: "Не оплачен",
-      2: "Должник",
-      3: "Предоплата",
-      4: "Предоплата (выехал)",
-    },
+    currentAction: null,
+    currentActionOrder: null,
     actionEvents: {
-      'temp-leave-action': 'Временный выезд предоплатника',
-      'order-checkout-action': 'Расчет',
-      'comeback-action': 'Возврат предоплатника из временного отъезда',
-      'order-create-action': 'Машина зарегистрирована'
+      'temp-leave': 'Временный выезд предоплатника',
+      'order-checkout': 'Расчет',
+      'comeback': 'Возврат предоплатника из временного отъезда',
+      'order-create': 'Машина зарегистрирована'
     },
-    orders: [
-      {
-        "type": 1,
-        "status": 1,
-        "created_at": new Date(2020, 7, 25, 11, 1),
-        "updated_at": new Date(2020, 7, 25, 11, 1),
-        "expires_at": new Date(2020, 8, 6, 21, 44),
-        "prepay_expires_at": null,
-        "daily_rate": 80,
-        "car": {
-          "manufacturer": "Hyundai",
-          "model": "Solaris",
-          "gov_id": "АА111А",
-        },
-        "customer": {
-          "last_name": "Иванов",
-          "first_name": "Иван",
-          "middle_name": "Иванович",
-          "phone": "+7 999 999 99 99"
-        },
-        "events": [
-          {
-            "description": "Зарегистрирован",
-            "created_at": new Date(2020, 7, 25, 11, 1),
-            "note": null,
-          }
-        ]
-      },
-      {
-        "type": 1,
-        "status": 3,
-        "created_at": new Date(2020, 7, 25, 11, 1),
-        "updated_at": new Date(2020, 7, 25, 11, 1),
-        "expires_at": new Date(2020, 11, 6, 21, 44),
-        "prepay_expires_at": new Date(2020, 10, 6, 21, 44),
-        "daily_rate": 130,
-        "car": {
-          "manufacturer": "Газель",
-          "model": "21",
-          "gov_id": "ББ111Б",
-        },
-        "customer": {
-          "last_name": "Петров",
-          "first_name": "Петр",
-          "middle_name": "Петрович",
-          "phone": "+7 999 999 99 98"
-        },
-        "events": [
-          {
-            "description": "Зарегистрирован",
-            "created_at": new Date(2020, 7, 25, 11, 1),
-            "note": null,
-          }
-        ]
-      },
-    ],
+    orders: [],
     dailyRates: [80, 130, 170]
   },
   mutations: {
-    increment(state) {
-      state.count++
+    ...vuexfireMutations,
+    setCurrentAction(state, actionName) {
+      state.currentAction = actionName;
+    },
+    setCurrentActionOrder(state, order) {
+      state.currentActionOrder = order;
     }
+  },
+  actions: {
+    bindOrders: firestoreAction(({bindFirestoreRef}) => {
+      // return the promise returned by `bindFirestoreRef`
+      return bindFirestoreRef('orders', db.collection('orders').where('status', 'not-in', [db.collection('settings/enums/order-statuses').doc('done')]))
+    }),
+    storeOrder: firestoreAction(({context}, order) => {
+      return db.collection('orders').add(Object.assign({}, order));
+    }),
+    storeOrderEvent: firestoreAction(({state}, payload) => {
+      let order = payload.order;
+      if(!order) {
+        order = state.currentActionOrder;
+      }
+      order.events.push(payload.event);
+      return db
+        .collection('orders')
+        .doc(order.id)
+        .update({events: order.events});
+    }),
+    updateOrderStatus: firestoreAction(({state}, payload) => {
+      let order = payload.order;
+      if(!order) {
+        order = state.currentActionOrder;
+      }
+      return db
+        .collection('orders')
+        .doc(order.id)
+        .update({status: payload.status});
+    })
   }
 })

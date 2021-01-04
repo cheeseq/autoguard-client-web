@@ -1,7 +1,7 @@
 <template>
   <div>
-    Рассчитать? Итоговая сумма
-    <order-details :order="order"></order-details>
+    <h3>Рассчитать? Итоговая сумма</h3>
+    <!-- <order-details :order="order"></order-details> -->
     <div class="row">
       <div class="col s12">
         <div class="input-field">
@@ -18,8 +18,8 @@
 <script>
 import OrderDetails from "@/components/OrderDetails";
 import ActionButtons from "@/components/ActionButtons";
-import {mapState} from 'vuex';
-
+import {mapActions, mapState} from 'vuex';
+import { db } from '@/db';
 
 export default {
   name: "OrderCheckoutAction",
@@ -32,22 +32,27 @@ export default {
       note: null
     }
   },
-  props: {
-    order: {
-      type: Object,
-      required: true
-    },
-  },
   computed: {
     ...mapState([
       'orders',
+      'currentActionOrder'
     ])
   },
   methods: {
-    commitAction() {
-      let idx = this.orders.findIndex((order) => order.customer.phone === this.order.customer.phone);
-      this.$emit('action:commit', {order: this.order, note: this.note});
+    ...mapActions([
+       'storeOrderEvent',
+       'updateOrderStatus'
+    ]),
+    async commitAction() {
+      let idx = this.orders.findIndex((order) => order.id === this.currentActionOrder.id);
+      await this.storeOrderEvent({event: {
+        descriptor: db.collection('settings/enums/order-events').doc('checkout'),
+        note: this.note,
+        created_at: new Date()
+      }});
+      await this.updateOrderStatus({status: db.collection('settings/enums/order-statuses').doc('done')})
       this.orders.splice(idx, 1);
+      this.$emit('action:commit');
     }
   }
 }
