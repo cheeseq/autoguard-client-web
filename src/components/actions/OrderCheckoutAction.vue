@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h3>Рассчитать? Итоговая сумма</h3>
-    <!-- <order-details :order="order"></order-details> -->
+    <h4>Рассчитать? Итоговая сумма: {{ getTotalPrice(currentActionOrder) }} рублей</h4>
+    <order-details :order="currentActionOrder"></order-details>
     <div class="row">
       <div class="col s12">
         <div class="input-field">
@@ -18,11 +18,13 @@
 <script>
 import OrderDetails from "@/components/OrderDetails";
 import ActionButtons from "@/components/ActionButtons";
+import OrderCalculations from '@/mixins/OrderCalculations';
 import {mapActions, mapState} from 'vuex';
 import { db } from '@/db';
 
 export default {
   name: "OrderCheckoutAction",
+  mixins: [OrderCalculations],
   components: {
     ActionButtons,
     OrderDetails
@@ -34,7 +36,6 @@ export default {
   },
   computed: {
     ...mapState([
-      'orders',
       'currentActionOrder'
     ])
   },
@@ -44,14 +45,12 @@ export default {
        'updateOrderStatus'
     ]),
     async commitAction() {
-      let idx = this.orders.findIndex((order) => order.id === this.currentActionOrder.id);
       await this.storeOrderEvent({event: {
         descriptor: db.collection('settings/enums/order-events').doc('checkout'),
         note: this.note,
         created_at: new Date()
       }});
-      await this.updateOrderStatus({status: db.collection('settings/enums/order-statuses').doc('done')})
-      this.orders.splice(idx, 1);
+      await this.updateOrderStatus({status: db.collection('settings/enums/order-statuses').doc('done')});
       this.$emit('action:commit');
     }
   }

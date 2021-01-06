@@ -38,25 +38,30 @@
         {{ order.prepay_expires_at ? order.prepay_expires_at.toDate().toLocaleString() : '-' }}
       </div>
       <div class="col s4">
-        <div><strong>На стоянке уже:</strong></div>
-        {{ daysSpent(order) }} дней
+        <div><strong>Тариф:</strong></div>
+        {{ order.daily_rate }} рублей в сутки
       </div>
     </div>
     <div class="row">
-      <div class="col s12">
+      <div class="col s4">
+        <div><strong>На стоянке уже:</strong></div>
+        {{ getSpentAsString(order) }}
+      </div>
+      <div class="col s14">
         <div><strong>К оплате:</strong></div>
-        {{ hoursSpent(order) * (order.daily_rate / 24) }} рублей
+        {{ getTotalPrice(order) }} рублей
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import moment from 'moment';
 import {mapState} from "vuex";
+import OrderCalculations from '@/mixins/OrderCalculations';
 
 export default {
   name: "OrderDetails",
+  mixins: [OrderCalculations],
   props: {
     order: {
       type: Object,
@@ -64,15 +69,7 @@ export default {
     },
   },
   methods: {
-    hoursSpent(order) {
-      moment.locale('ru');
-      let regTime = moment(order.created_at.toDate());
-      let duration = moment().diff(regTime, 'hours', true);
-      return Math.round(duration);
-    },
-    daysSpent(order) {
-      return this.hoursSpent(order) / 24;
-    },
+    
     getFullname(customer) {
       return `${customer.last_name} ${customer.first_name} ${customer.middle_name}`
     }
