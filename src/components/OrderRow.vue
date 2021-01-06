@@ -5,7 +5,7 @@
       'grey lighten-3': isLeftPrepayer(order),
     }"
   >
-    <td>{{ order.car.model }}</td>
+    <td>{{ order.car.manufacturer }} {{ order.car.model }}</td>
     <td>{{ order.car.gov_id }}</td>
     <td>{{ getFullname(order.customer) }}</td>
     <td>{{ order.customer.phone }}</td>
@@ -44,13 +44,13 @@ export default {
       return order.status === 2;
     },
     isPrepayer(order) {
-      return order.status === 3;
+      return order.status.id === 'prepayer';
     },
     isLeftPrepayer(order) {
       return order.status === 4;
     },
     getFullname(customer) {
-      return `${customer.last_name} ${customer.first_name} ${customer.middle_name}`;
+      return `${customer.last_name} ${customer.first_name} ${customer.middle_name ?? ''}`;
     },
   },
 };

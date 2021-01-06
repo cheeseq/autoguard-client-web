@@ -12,7 +12,7 @@
         <table class="centered highlight">
           <thead>
           <tr>
-            <th>Марка</th>
+            <th>Автомобиль</th>
             <th>Гос.номер</th>
             <th>Ф.И.О</th>
             <th>Телефон</th>
