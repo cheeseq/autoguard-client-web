@@ -12,7 +12,7 @@
       <tr v-for="(event, idx) of order.events" :key="idx">
         <td>{{ event.descriptor.name }}</td>
         <td>{{ event.created_at.toDate().toLocaleString() }}</td>
-        <td>{{ event.note }}</td>
+        <td>{{ resolveEventNote(event) }}</td>
       </tr>
       </tbody>
     </table>
@@ -30,6 +30,15 @@ export default {
       required: true
     },
   },
+  methods: {
+    resolveEventNote(event) {
+      if(event.oldStatus && event.newStatus) {
+        return `Статус изменен с "${event.oldStatus.name}" на "${event.newStatus.name}"`;
+      }
+
+      return event.note;
+    }
+  }
 }
 </script>
 

@@ -155,7 +155,7 @@ import "vue2-datepicker/locale/ru";
 import { required, requiredIf } from "vuelidate/lib/validators";
 import ActionButtons from "@/components/ActionButtons";
 import OrderCreateFormPrepay from "@/components/order/create/OrderCreateFormPrepay";
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapState, mapGetters } from "vuex";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/db";
 import moment from "moment";
@@ -165,6 +165,9 @@ export default {
   components: {
     ActionButtons,
     OrderCreateFormPrepay,
+  },
+  computed: {
+    ...mapState(["settings"])
   },
   data() {
     return {
@@ -228,7 +231,7 @@ export default {
 
       this.order.created_at = moment().toDate();
       this.order.expires_at = moment()
-        .add(1, "months")
+        .add(this.settings['expiring-time-days'], "days")
         .toDate();
       this.order.type = db.collection("settings/enums/order-types").doc("car-parking");
       this.order.status = this.is_prepay
@@ -240,7 +243,7 @@ export default {
       } finally {
         this.$emit("action:commit");
       }
-      
+
     },
 
   },

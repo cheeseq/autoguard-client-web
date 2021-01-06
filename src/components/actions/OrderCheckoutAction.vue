@@ -42,7 +42,7 @@ export default {
   methods: {
     ...mapActions([
        'storeOrderEvent',
-       'updateOrderStatus'
+       'updateOrderStatusSilently'
     ]),
     async commitAction() {
       await this.storeOrderEvent({event: {
@@ -50,7 +50,7 @@ export default {
         note: this.note,
         created_at: new Date()
       }});
-      await this.updateOrderStatus({status: db.collection('settings/enums/order-statuses').doc('done')});
+      await this.updateOrderStatusSilently({status: db.collection('settings/enums/order-statuses').doc('done')});
       this.$emit('action:commit');
     }
   }

@@ -18,6 +18,18 @@ export default {
     },
     getTotalPrice(order) {
       return Math.round(this.getHoursSpent(order) * (order.daily_rate / 24));
-    }
+    },
+    isUnpaid(order) {
+      return order.status.id === 'unpaid';
+    },
+    isDebtor(order) {
+      return order.status.id === 'debtor';
+    },
+    isPrepayer(order) {
+      return order.status.id === 'prepayer';
+    },
+    isLeftPrepayer(order) {
+      return order.status.id === 'temporary-left';
+    },
   }
 }
