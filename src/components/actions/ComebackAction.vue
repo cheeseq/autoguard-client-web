@@ -12,39 +12,61 @@
       </div>
     </div>
 
-    <action-buttons
-        @action:commit="commitAction"
-        @action:cancel="$emit('action:cancel')"></action-buttons>
+    <action-buttons @action:commit="commitAction" @action:cancel="$emit('action:cancel')"></action-buttons>
   </div>
 </template>
 
 <script>
-import moment from 'moment';
+import moment from "moment";
 import ActionButtons from "@/components/ActionButtons";
+import { mapActions, mapState } from "vuex";
+import { db } from "@/db";
+import OrderCalculations from "@/mixins/OrderCalculations";
 
 export default {
   name: "ComebackAction",
-  components: {ActionButtons},
+  components: { ActionButtons },
+  mixins: [OrderCalculations],
   data() {
     return {
-      note: null
-    }
+      note: null,
+    };
   },
-  props: {
-    order: {
-      type: Object,
-      required: true
-    }
+  computed: {
+    ...mapState(["currentActionOrder"]),
   },
   methods: {
-    commitAction() {
-      let duration = moment.duration(moment().diff(this.order.temp_left_at));
-      this.order.expires_at = moment(this.order.expires_at).add(duration).toDate();
-      this.order.prepay_expires_at = moment(this.order.prepay_expires_at).add(duration).toDate();
-      this.order.temp_left_at = null;
-      this.order.status = 3;
-      this.$emit('action:commit', {note: this.note});
-    }
-  }
-}
+    ...mapActions(["updateOrder"]),
+    async commitAction() {
+      if (!this.isLeftPrepayer(this.currentActionOrder) || !this.currentActionOrder.temporary_left_at) {
+        console.warn("Cannot commit comeback action: failed preconditions", this.currentActionOrder);
+        this.$emit("action:cancel");
+      }
+
+      let duration = moment.duration(moment().diff(this.currentActionOrder.temporary_left_at.toDate()));
+
+      this.currentActionOrder.events.push({
+        descriptor: db.collection("settings/enums/order-events").doc("comeback"),
+        note: this.note,
+        created_at: new Date(),
+      });
+
+      await this.updateOrder({
+        data: {
+          events: this.currentActionOrder.events,
+          status: db.collection("settings/enums/order-statuses").doc("prepayer"),
+          temporary_left_at: null,
+          expires_at: moment(this.currentActionOrder.expires_at.toDate())
+            .add(duration)
+            .toDate(),
+          prepay_expires_at: moment(this.currentActionOrder.prepay_expires_at.toDate())
+            .add(duration)
+            .toDate(),
+        },
+      });
+
+      this.$emit("action:commit");
+    },
+  },
+};
 </script>

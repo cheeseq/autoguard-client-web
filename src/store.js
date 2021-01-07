@@ -4,7 +4,7 @@ import { vuexfireMutations, firestoreAction } from "vuexfire";
 import { db } from "./db";
 Vue.use(Vuex);
 
-const state = new Vuex.Store({
+const store = new Vuex.Store({
   state: {
     currentAction: null,
     currentActionOrder: null,
@@ -39,6 +39,10 @@ const state = new Vuex.Store({
     storeOrder: firestoreAction(({ context }, order) => {
       return db.collection("orders").add(Object.assign({}, order));
     }),
+    updateOrder: firestoreAction(({context}, payload) => {
+      let order = resolveOrder(payload);
+      return updateOrder(order.id, payload.data);
+    }),
     storeOrderEvent: firestoreAction(({ state }, payload) => {
       let order = resolveOrder(payload);
       order.events.push(payload.event);
@@ -62,7 +66,13 @@ const state = new Vuex.Store({
 });
 
 function resolveOrder(payload) {
-  return payload.order || state.currentActionOrder;
+  if(payload.order) {
+    return payload.order;
+  }
+  if(store.state.currentActionOrder) {
+    return store.state.currentActionOrder;
+  }
+  throw new Error("Cannot resolve order from payload");
 }
 
 function updateOrder(orderId, data) {
@@ -72,4 +82,4 @@ function updateOrder(orderId, data) {
     .update(data);
 }
 
-export default state;
+export default store;

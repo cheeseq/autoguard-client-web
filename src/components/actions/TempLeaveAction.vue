@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="row">
-      Подтвердить выезд предоплатника?
+      <h4>Подтвердить выезд предоплатника?</h4>
     </div>
 
     <div class="row">
@@ -12,39 +12,52 @@
       </div>
     </div>
 
-    <action-buttons
-        @action:commit="commitAction"
-        @action:cancel="$emit('action:cancel')"></action-buttons>
+    <action-buttons @action:commit="commitAction" @action:cancel="$emit('action:cancel')"></action-buttons>
   </div>
 </template>
 
 <script>
 import ActionButtons from "@/components/ActionButtons";
+import { mapActions, mapState } from "vuex";
+import { db } from "@/db";
+import OrderCalculations from "@/mixins/OrderCalculations";
 
 export default {
   name: "TempLeaveAction",
-  components: {ActionButtons},
+  components: { ActionButtons },
+  mixins: [OrderCalculations],
   data() {
     return {
-      note: null
-    }
+      note: null,
+    };
   },
-  props: {
-    order: {
-      type: Object,
-      required: true
-    }
+  computed: {
+    ...mapState(["currentActionOrder"]),
   },
   methods: {
-    commitAction() {
-      this.order.temp_left_at = new Date();
-      this.order.status = 4;
-      this.$emit('action:commit', {note: this.note});
-    }
-  }
-}
+    ...mapActions(["updateOrder"]),
+    async commitAction() {
+      if (!this.isPrepayer(this.currentActionOrder) || this.currentActionOrder.temporary_left_at !== null) {
+        console.warn("Cannot commit temporary leaving action: failed preconditions", this.currentActionOrder);
+        this.$emit("action:cancel");
+      }
+
+      this.currentActionOrder.events.push({
+        descriptor: db.collection("settings/enums/order-events").doc("temporary-leaving"),
+        note: this.note,
+        created_at: new Date(),
+      });
+
+      await this.updateOrder({
+        data: {
+          events: this.currentActionOrder.events,
+          status: db.collection("settings/enums/order-statuses").doc("temporary-left"),
+          temporary_left_at: new Date(),
+        },
+      });
+
+      this.$emit("action:commit");
+    },
+  },
+};
 </script>
-
-<style scoped>
-
-</style>
