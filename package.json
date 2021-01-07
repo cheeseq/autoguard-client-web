@@ -19,6 +19,7 @@
     "v-mask": "^2.2.3",
     "vue": "^2.6.11",
     "vue-js-modal": "^2.0.0-rc.6",
+    "vue-loading-overlay": "^3.4.2",
     "vue2-datepicker": "^3.8.2",
     "vuelidate": "^0.7.6",
     "vuex": "^3.6.0",

@@ -44,7 +44,7 @@ export default {
        'updateOrder'
     ]),
     async commitAction() {
-      if(this.isDebtor(this.currentActionOrder)) {
+      if(this.isPrepayer(this.currentActionOrder) || this.isLeftPrepayer(this.currentActionOrder)) {
         console.warn("Cannot commit checkout action: failed preconditions", this.currentActionOrder);
         this.$emit("action:cancel");
         return;

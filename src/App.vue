@@ -1,5 +1,7 @@
 <template>
   <div id="app" style="padding-top: 2rem;">
+    <loading :active.sync="isLoading" :can-cancel="false" :is-full-page="true"></loading>
+
     <div class="row">
       <div class="col s12">
         <button class="btn" @click="setAction('order-create-action')">Добавить авто</button>
@@ -61,21 +63,33 @@ import OrderRow from "@/components/OrderRow";
 import OrderCalculations from "@/mixins/OrderCalculations";
 import { mapActions, mapMutations, mapState } from "vuex";
 import { db } from "@/db";
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
 
 export default {
   name: "App",
-  components: { OrderRow, OrderCreateAction, OrderDetailsAction, OrderCheckoutAction, TempLeaveAction, ComebackAction },
+  components: {
+    OrderRow,
+    OrderCreateAction,
+    OrderDetailsAction,
+    OrderCheckoutAction,
+    TempLeaveAction,
+    ComebackAction,
+    Loading,
+  },
   mixins: [OrderCalculations],
-
   computed: {
-    ...mapState(["orders", "currentAction", "currentActionOrder"]),
-    ...mapMutations(["setCurrentAction"]),
+    ...mapState(["isLoading", "orders", "currentAction", "currentActionOrder"]),
   },
   async mounted() {
+    this.setIsLoading(true);
+
     await this.bindOrders();
     await this.bindSettings();
+
     //@todo fetch cars from api
-    //@todo fetch owner deadline
+    this.setIsLoading(false);
+
     setInterval(async () => {
       let currentDate = new Date();
       for (let order of this.orders) {
@@ -96,6 +110,7 @@ export default {
     }, 60000);
   },
   methods: {
+    ...mapMutations(["setIsLoading", "setCurrentAction"]),
     ...mapActions(["bindOrders", "bindSettings", "updateOrderStatus"]),
     setAction(actionName, order) {
       this.$store.commit("setCurrentActionOrder", order);
@@ -109,11 +124,13 @@ export default {
       this.$store.commit("setCurrentAction", null);
       this.$store.commit("setCurrentActionOrder", null);
       this.closeActionModal();
+      this.setIsLoading(false);
     },
     cancelAction() {
       this.$store.commit("setCurrentAction", null);
       this.$store.commit("setCurrentActionOrder", null);
       this.closeActionModal();
+      this.setIsLoading(false);
     },
     openActionModal() {
       this.$modal.show("action-modal");
