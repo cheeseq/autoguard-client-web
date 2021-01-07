@@ -43,11 +43,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="col s4">
-        <div><strong>На стоянке уже:</strong></div>
-        {{ getSpentAsString(order) }}
-      </div>
-      <div class="col s14">
+      <div class="col s14" v-if="isUnpaid(order) || isDebtor(order)">
         <div><strong>К оплате:</strong></div>
         {{ getTotalPrice(order) }} рублей
       </div>
