@@ -40,6 +40,7 @@ export default {
       if (!this.isPrepayer(this.currentActionOrder) || this.currentActionOrder.temporary_left_at !== null) {
         console.warn("Cannot commit temporary leaving action: failed preconditions", this.currentActionOrder);
         this.$emit("action:cancel");
+        return;
       }
 
       this.currentActionOrder.events.push({

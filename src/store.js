@@ -8,12 +8,6 @@ const store = new Vuex.Store({
   state: {
     currentAction: null,
     currentActionOrder: null,
-    actionEvents: {
-      "temp-leave": "Временный выезд предоплатника",
-      "order-checkout": "Расчет",
-      comeback: "Возврат предоплатника из временного отъезда",
-      "order-create": "Машина зарегистрирована",
-    },
     orders: [],
     settings: {},
   },

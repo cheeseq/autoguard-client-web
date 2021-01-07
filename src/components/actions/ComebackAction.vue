@@ -41,6 +41,7 @@ export default {
       if (!this.isLeftPrepayer(this.currentActionOrder) || !this.currentActionOrder.temporary_left_at) {
         console.warn("Cannot commit comeback action: failed preconditions", this.currentActionOrder);
         this.$emit("action:cancel");
+        return;
       }
 
       let duration = moment.duration(moment().diff(this.currentActionOrder.temporary_left_at.toDate()));

@@ -41,16 +41,28 @@ export default {
   },
   methods: {
     ...mapActions([
-       'storeOrderEvent',
-       'updateOrderStatusSilently'
+       'updateOrder'
     ]),
     async commitAction() {
-      await this.storeOrderEvent({event: {
-        descriptor: db.collection('settings/enums/order-events').doc('checkout'),
+      if(this.isDebtor(this.currentActionOrder)) {
+        console.warn("Cannot commit checkout action: failed preconditions", this.currentActionOrder);
+        this.$emit("action:cancel");
+        return;
+      }
+
+      this.currentActionOrder.events.push({
+        descriptor: db.collection("settings/enums/order-events").doc("checkout"),
         note: this.note,
-        created_at: new Date()
-      }});
-      await this.updateOrderStatusSilently({status: db.collection('settings/enums/order-statuses').doc('done')});
+        created_at: new Date(),
+      });
+
+      await this.updateOrder({
+        data: {
+          events: this.currentActionOrder.events,
+          status: db.collection("settings/enums/order-statuses").doc("done")
+        },
+      });
+
       this.$emit('action:commit');
     }
   }
