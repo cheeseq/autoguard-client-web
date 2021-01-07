@@ -58,21 +58,16 @@
 <script>
 import {mapState} from "vuex";
 import OrderCalculations from '@/mixins/OrderCalculations';
+import Customer from "@/mixins/Customer";
 
 export default {
   name: "OrderDetails",
-  mixins: [OrderCalculations],
+  mixins: [OrderCalculations, Customer],
   props: {
     order: {
       type: Object,
       required: true
     },
-  },
-  methods: {
-    
-    getFullname(customer) {
-      return `${customer.last_name} ${customer.first_name} ${customer.middle_name}`
-    }
   }
 }
 </script>
