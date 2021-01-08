@@ -1,28 +1,17 @@
-import firebase from 'firebase/app';
-import 'firebase/firestore';
-// Get a Firestore instance
-export const db = firebase
-  .initializeApp({ projectId: process.env.VUE_APP_FIREBASE_PROJECT_ID })
-  .firestore();
+import FBApp from './firebase';
+import "firebase/firestore";
 
-db
-    .enablePersistence()
-    .catch(function(err) {
-        if (err.code == 'failed-precondition') {
-            console.log('failed-precondition');
-        } else if (err.code == 'unimplemented') {
-            // The current browser does not support all of the
-            // features required to enable persistence
-            // ...
-            console.log('unimplemented');
-        }
-    });
-  
+const db = FBApp.firestore();
 
-// Export types that exists in Firestore
-// This is not always necessary, but it's used in other examples
-const { TimeStamp, GeoPoint } = firebase.firestore
-export { TimeStamp, GeoPoint }
+db.enablePersistence().catch(function(err) {
+  if (err.code == "failed-precondition") {
+    console.log("failed-precondition");
+  } else if (err.code == "unimplemented") {
+    // The current browser does not support all of the
+    // features required to enable persistence
+    // ...
+    console.log("unimplemented");
+  }
+});
 
-// // if using Firebase JS SDK < 5.8.0
-// db.settings({ timestampsInSnapshots: true })
+export {db};

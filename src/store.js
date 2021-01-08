@@ -11,6 +11,7 @@ const store = new Vuex.Store({
     currentActionOrder: null,
     orders: [],
     settings: {},
+    user: null,
   },
   mutations: {
     ...vuexfireMutations,
@@ -22,6 +23,9 @@ const store = new Vuex.Store({
     },
     setIsLoading(state, isLoading) {
       state.isLoading = isLoading;
+    },
+    setUser(state, user) {
+      state.user = user;
     },
   },
   actions: {

@@ -1,59 +1,63 @@
 <template>
   <div id="app" style="padding-top: 2rem;">
-    <loading :active.sync="isLoading" :can-cancel="false" :is-full-page="true"></loading>
+    <auth v-if="!user" />
+    <div v-if="user">
+      <loading :active.sync="isLoading" :can-cancel="false" :is-full-page="true"></loading>
 
-    <div class="row">
-      <div class="col s12">
-        <button class="btn" @click="setAction('order-create-action')">Добавить авто</button>
+      <div class="row">
+        <div class="col s12">
+          <button class="btn" @click="setAction('order-create-action')">Добавить авто</button>
+        </div>
       </div>
+
+      <div class="row">
+        <div class="col s12">
+          <h3>Зарегистрированные авто</h3>
+          <table class="centered highlight">
+            <thead>
+              <tr>
+                <th>Автомобиль</th>
+                <th>Гос.номер</th>
+                <th>Ф.И.О</th>
+                <th>Телефон</th>
+                <th>Заезд</th>
+                <th>Предоплата истекает</th>
+                <th>Статус</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <order-row v-for="order of orders" :key="order.id" :order="order" @set-action="setActionFromEvent" />
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <modal
+        name="action-modal"
+        :min-width="200"
+        :min-height="200"
+        :scrollable="true"
+        :reset="true"
+        width="60%"
+        height="auto"
+      >
+        <div style="padding: 2rem;">
+          <component
+            :is="currentAction"
+            :order="currentActionOrder"
+            @action:cancel="cancelAction"
+            @action:commit="commitAction"
+          ></component>
+        </div>
+      </modal>
     </div>
-
-    <div class="row">
-      <div class="col s12">
-        <h3>Зарегистрированные авто</h3>
-        <table class="centered highlight">
-          <thead>
-            <tr>
-              <th>Автомобиль</th>
-              <th>Гос.номер</th>
-              <th>Ф.И.О</th>
-              <th>Телефон</th>
-              <th>Заезд</th>
-              <th>Предоплата истекает</th>
-              <th>Статус</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <order-row v-for="order of orders" :key="order.id" :order="order" @set-action="setActionFromEvent" />
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <modal
-      name="action-modal"
-      :min-width="200"
-      :min-height="200"
-      :scrollable="true"
-      :reset="true"
-      width="60%"
-      height="auto"
-    >
-      <div style="padding: 2rem;">
-        <component
-          :is="currentAction"
-          :order="currentActionOrder"
-          @action:cancel="cancelAction"
-          @action:commit="commitAction"
-        ></component>
-      </div>
-    </modal>
   </div>
 </template>
 
 <script>
 import "materialize-css/dist/css/materialize.min.css";
+import Auth from "@/components/Auth";
 import OrderCreateAction from "@/components/actions/OrderCreateAction";
 import OrderDetailsAction from "@/components/actions/OrderDetailsAction";
 import OrderCheckoutAction from "@/components/actions/OrderCheckoutAction";
@@ -76,10 +80,11 @@ export default {
     TempLeaveAction,
     ComebackAction,
     Loading,
+    Auth,
   },
   mixins: [OrderCalculations],
   computed: {
-    ...mapState(["isLoading", "orders", "currentAction", "currentActionOrder"]),
+    ...mapState(["isLoading", "orders", "currentAction", "currentActionOrder", "user"]),
   },
   async mounted() {
     this.setIsLoading(true);
