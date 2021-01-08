@@ -36,8 +36,8 @@ export default {
   },
   methods: {
     ...mapActions(["updateOrder"]),
-    async commitAction() {
-      if (!this.isPrepayer(this.currentActionOrder) || this.currentActionOrder.temporary_left_at !== null) {
+    commitAction() {
+      if (!this.isPrepayer(this.currentActionOrder) || this.currentActionOrder.temporary_left_at) {
         console.warn("Cannot commit temporary leaving action: failed preconditions", this.currentActionOrder);
         this.$emit("action:cancel");
         return;
@@ -49,7 +49,7 @@ export default {
         created_at: new Date(),
       });
 
-      await this.updateOrder({
+      this.updateOrder({
         data: {
           events: this.currentActionOrder.events,
           status: db.collection("settings/enums/order-statuses").doc("temporary-left"),

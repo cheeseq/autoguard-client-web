@@ -86,27 +86,25 @@ export default {
   computed: {
     ...mapState(["isLoading", "orders", "currentAction", "currentActionOrder", "user"]),
   },
-  async mounted() {
+  mounted() {
     this.setIsLoading(true);
-
-    await this.bindOrders();
-    await this.bindSettings();
+    
+    this.bindOrders();
+    this.bindSettings();
 
     //@todo fetch cars from api
     this.setIsLoading(false);
 
-    setInterval(async () => {
+    setInterval(() => {
       let currentDate = new Date();
       for (let order of this.orders) {
         if (this.isUnpaid(order) && order.expires_at.toDate() < currentDate) {
-          console.log("order expired - switching status to debtor");
-          await this.updateOrderStatus({
+          this.updateOrderStatus({
             order: order,
             status: db.collection("settings/enums/order-statuses").doc("debtor"),
           });
         } else if (this.isPrepayer(order) && order.prepay_expires_at.toDate() < currentDate) {
-          console.log("order prepay expired - switching status to unpaid");
-          await this.updateOrderStatus({
+          this.updateOrderStatus({
             order: order,
             status: db.collection("settings/enums/order-statuses").doc("unpaid"),
           });

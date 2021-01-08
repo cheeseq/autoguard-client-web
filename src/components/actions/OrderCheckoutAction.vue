@@ -43,7 +43,7 @@ export default {
     ...mapActions([
        'updateOrder'
     ]),
-    async commitAction() {
+    commitAction() {
       if(this.isPrepayer(this.currentActionOrder) || this.isLeftPrepayer(this.currentActionOrder)) {
         console.warn("Cannot commit checkout action: failed preconditions", this.currentActionOrder);
         this.$emit("action:cancel");
@@ -56,7 +56,7 @@ export default {
         created_at: new Date(),
       });
 
-      await this.updateOrder({
+      this.updateOrder({
         data: {
           events: this.currentActionOrder.events,
           status: db.collection("settings/enums/order-statuses").doc("done")

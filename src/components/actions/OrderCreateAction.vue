@@ -222,7 +222,7 @@ export default {
   methods: {
     ...mapActions(["storeOrder"]),
 
-    async addOrder() {
+    addOrder() {
       this.$v.$touch();
 
       if (this.$v.$invalid) {
@@ -238,12 +238,8 @@ export default {
         ? db.collection("settings/enums/order-statuses").doc("prepayer")
         : db.collection("settings/enums/order-statuses").doc("unpaid");
 
-      try {
-        await this.storeOrder(this.order);
-      } finally {
-        this.$emit("action:commit");
-      }
-
+      this.storeOrder(this.order);
+      this.$emit("action:commit");
     },
 
   },

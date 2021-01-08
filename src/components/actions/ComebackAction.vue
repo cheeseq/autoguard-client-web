@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     ...mapActions(["updateOrder"]),
-    async commitAction() {
+    commitAction() {
       if (!this.isLeftPrepayer(this.currentActionOrder) || !this.currentActionOrder.temporary_left_at) {
         console.warn("Cannot commit comeback action: failed preconditions", this.currentActionOrder);
         this.$emit("action:cancel");
@@ -52,7 +52,7 @@ export default {
         created_at: new Date(),
       });
 
-      await this.updateOrder({
+      this.updateOrder({
         data: {
           events: this.currentActionOrder.events,
           status: db.collection("settings/enums/order-statuses").doc("prepayer"),
