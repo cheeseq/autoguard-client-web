@@ -32,7 +32,11 @@ const store = new Vuex.Store({
     bindOrders: firestoreAction(({ bindFirestoreRef }) => {
       return bindFirestoreRef(
         "orders",
-        db.collection("orders").where("status", "not-in", [db.collection("settings/enums/order-statuses").doc("done")])
+        db
+          .collection("orders")
+          .where("status", "not-in", [db.collection("settings/enums/order-statuses").doc("done")])
+          .orderBy("status")
+          .orderBy("created_at", "desc")
       );
     }),
     bindSettings: firestoreAction(({ bindFirestoreRef }) => {
