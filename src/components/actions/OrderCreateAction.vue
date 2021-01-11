@@ -201,9 +201,7 @@ export default {
         manufacturer: {
           required,
         },
-        model: {
-          required,
-        },
+        model: {},
         gov_id: {
           required,
         },
@@ -212,9 +210,7 @@ export default {
         last_name: {
           required,
         },
-        first_name: {
-          required,
-        },
+        first_name: { },
         middle_name: { },
       },
     },

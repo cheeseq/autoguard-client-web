@@ -7,7 +7,7 @@
     <td>{{ order.created_at.toDate().toLocaleString() }}</td>
     <td>{{ order.prepay_expires_at ? order.prepay_expires_at.toDate().toLocaleString() : "-" }}</td>
     <td>
-      <span :class="{ 'red-text': isDebtor(order) }">{{ order.status.name }}</span>
+      <span :class="{ 'red-text': isDebtor(order) || isUnpaid(order) }">{{ order.status.name }}</span>
     </td>
     <td>
       <div>

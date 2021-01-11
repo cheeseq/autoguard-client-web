@@ -30,6 +30,7 @@
           :disabled-date="disabledBeforeToday"
           :disabled-time="disabledBeforeNow"
           :editable="false"
+          :clearable="false"
           :time-picker-options="{
             start: '00:00',
             end: '23:00',
@@ -127,5 +128,8 @@ export default {
 <style>
 .mx-datepicker {
   width: 100%;
+}
+.mx-input-wrapper input {
+  color: black !important;
 }
 </style>
