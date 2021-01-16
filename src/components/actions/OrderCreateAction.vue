@@ -12,48 +12,7 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col s4">
-        <div class="input-field">
-          <input
-            type="text"
-            id="car_manufacturer"
-            v-model="$v.order.car.manufacturer.$model"
-            :class="{ invalid: $v.order.car.manufacturer.$error }"
-            placeholder="Марка"
-          />
-          <span
-            v-if="!$v.order.car.manufacturer.required"
-            class="helper-text"
-            data-error="Обязательно для заполнения"
-          ></span>
-        </div>
-      </div>
-      <div class="col s4">
-        <div class="input-field">
-          <input
-            type="text"
-            v-model="$v.order.car.model.$model"
-            id="car_model"
-            :class="{ invalid: $v.order.car.model.$error }"
-            placeholder="Модель"
-          />
-          <span v-if="!$v.order.car.model.required" class="helper-text" data-error="Обязательно для заполнения"></span>
-        </div>
-      </div>
-      <div class="col s4">
-        <div class="input-field">
-          <input
-            type="text"
-            id="car_gov_id"
-            v-model="$v.order.car.gov_id.$model"
-            :class="{ invalid: $v.order.car.gov_id.$error }"
-            placeholder="Гос.номер"
-          />
-          <span v-if="!$v.order.car.gov_id.required" class="helper-text" data-error="Обязательно для заполнения"></span>
-        </div>
-      </div>
-    </div>
+    <order-create-form-car :order="order" :v="$v.order.car"></order-create-form-car>
 
     <div class="row">
       <div class="col s3">
@@ -159,12 +118,14 @@ import { mapActions, mapState, mapGetters } from "vuex";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/db";
 import moment from "moment";
+import OrderCreateFormCar from '@/components/order/create/OrderCreateFormCar.vue';
 
 export default {
   name: "OrderCreateAction",
   components: {
     ActionButtons,
     OrderCreateFormPrepay,
+    OrderCreateFormCar,
   },
   computed: {
     ...mapState(["settings"])
@@ -199,11 +160,11 @@ export default {
       },
       car: {
         manufacturer: {
-          required,
+          required: required,
         },
         model: {},
         gov_id: {
-          required,
+          required: required,
         },
       },
       customer: {
