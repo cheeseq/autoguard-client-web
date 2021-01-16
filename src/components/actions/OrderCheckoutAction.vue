@@ -59,7 +59,8 @@ export default {
       this.updateOrder({
         data: {
           events: this.currentActionOrder.events,
-          status: db.collection("settings/enums/order-statuses").doc("done")
+          status: db.collection("settings/enums/order-statuses").doc("done"),
+          total_price: this.getTotalPrice(this.currentActionOrder)
         },
       });
 
