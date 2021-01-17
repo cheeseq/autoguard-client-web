@@ -3,8 +3,11 @@
     <order-details :order="order"></order-details>
     <order-events :events="order.events"></order-events>
     <action-buttons
-        @action:commit="$emit('action:commit')"
-        @action:cancel="$emit('action:cancel')"></action-buttons>
+      :showCancelButton="false"
+      :commitButtonText="'Закрыть'"
+      @action:commit="$emit('action:commit')"
+      @action:cancel="$emit('action:cancel')"
+    ></action-buttons>
   </div>
 </template>
 
@@ -15,12 +18,12 @@ import OrderEvents from "@/components/OrderEvents";
 
 export default {
   name: "OrderDetailsAction",
-  components: {OrderEvents, ActionButtons, OrderDetails},
+  components: { OrderEvents, ActionButtons, OrderDetails },
   props: {
     order: {
       type: Object,
-      required: true
+      required: true,
     },
   },
-}
+};
 </script>

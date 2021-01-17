@@ -17,7 +17,7 @@ describe('OrderEvents.vue', () => {
     const wrapper = shallowMount(OrderEvents, {
       propsData: { events: [] }
     });
-    expect(wrapper.isEmpty()).toBe(true);
+    expect(wrapper.isEmpty()).toBeTruthy();
   });
 
   it("displays exactly same count of rows as events", () => {
@@ -47,7 +47,7 @@ describe('OrderEvents.vue', () => {
         ],
       },
     });
-    expect(wrapper.isEmpty()).toBe(false);
+    expect(wrapper.isEmpty()).toBeFalsy();
     expect(wrapper.find('tbody').findAll('tr').length).toBe(4);
   });
 
