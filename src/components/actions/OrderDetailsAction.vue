@@ -1,7 +1,7 @@
 <template>
   <div>
     <order-details :order="order"></order-details>
-    <order-events :order="order"></order-events>
+    <order-events :events="order.events"></order-events>
     <action-buttons
         @action:commit="$emit('action:commit')"
         @action:cancel="$emit('action:cancel')"></action-buttons>

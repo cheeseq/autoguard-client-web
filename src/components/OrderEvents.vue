@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="events.length > 0">
     <table class="centered highlight">
       <thead>
       <tr>
@@ -9,7 +9,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(event, idx) of order.events" :key="idx">
+      <tr v-for="(event, idx) of events" :key="idx">
         <td>{{ event.descriptor.name }}</td>
         <td>{{ event.created_at.toDate().toLocaleString() }}</td>
         <td>{{ resolveEventNote(event) }}</td>
@@ -25,8 +25,8 @@ import {mapState} from "vuex";
 export default {
   name: "OrderEvents",
   props: {
-    order: {
-      type: Object,
+    events: {
+      type: Array,
       required: true
     },
   },
