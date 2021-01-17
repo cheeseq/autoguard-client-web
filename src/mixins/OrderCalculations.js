@@ -6,10 +6,10 @@ export default {
       moment.locale('ru');
       let regTime = moment(order.created_at.toDate());
       let currentTime = moment();
-      if (regTime.dayOfYear() == currentTime.dayOfYear()) {
+      let hoursSpent = currentTime.diff(regTime, 'hours', true);
+      if (hoursSpent < 24) {
         return 24;
       }
-      let hoursSpent = currentTime.diff(regTime, 'hours', true);
       return Math.round(hoursSpent);
     },
     getFullDaysSpent(order) {
